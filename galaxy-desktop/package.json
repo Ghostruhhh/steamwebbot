@@ -2,6 +2,7 @@
   "name": "galaxy-loader-gui",
   "version": "1.0.0",
   "private": true,
+  "author": "Galaxy Products",
   "description": "Galaxy Products — desktop loader (EXE with themed UI)",
   "main": "main.js",
   "scripts": {
