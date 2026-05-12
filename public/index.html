@@ -1,0 +1,4311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script>
+    (function () {
+      try {
+        document.documentElement.dataset.theme =
+          localStorage.getItem('steamscope.theme') || 'dark';
+        document.documentElement.dataset.accent =
+          localStorage.getItem('steamscope.accent') || 'blue';
+      } catch (e) { /* ignore */ }
+    })();
+  </script>
+  <title>Galaxy Products — local tools hub</title>
+  <meta name="description" content="Galaxy Products: local localhost tools and utilities." />
+  <link rel="icon" type="image/png" href="/assets/galaxy-products-logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --surface: rgba(255,255,255,0.05);
+      --border: rgba(255,255,255,0.1);
+      --text: #eef0f8;
+      --muted: rgba(238,240,248,0.58);
+      --accent: #66c0f4;
+      --accent-2: #1b74b3;
+      --accent-soft: rgba(102, 192, 244, 0.18);
+      --rail-hit: 46px;
+      --rail-inner-width: clamp(268px, 28vw, 328px);
+      --brand-magenta: #d831b0;
+      --brand-cyan: #00aeef;
+    }
+    html[data-accent="purple"] {
+      --accent: #b481ff;
+      --accent-2: #6b3ec0;
+      --accent-soft: rgba(180, 129, 255, 0.22);
+    }
+    html[data-accent="green"] {
+      --accent: #5ee27a;
+      --accent-2: #23823a;
+      --accent-soft: rgba(94, 226, 122, 0.2);
+    }
+    html[data-accent="orange"] {
+      --accent: #ff944d;
+      --accent-2: #c25a18;
+      --accent-soft: rgba(255, 148, 77, 0.2);
+    }
+    html[data-accent="pink"] {
+      --accent: #ff7ab8;
+      --accent-2: #b8407a;
+      --accent-soft: rgba(255, 122, 184, 0.2);
+    }
+    html[data-accent="cyan"] {
+      --accent: #5ee0e0;
+      --accent-2: #1f9595;
+      --accent-soft: rgba(94, 224, 224, 0.22);
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html {
+      height: 100%;
+      color-scheme: dark;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      min-height: 100dvh;
+      height: 100%;
+      overflow: hidden;
+      font-family: Inter, system-ui, sans-serif;
+      background: #030218;
+      color: var(--text);
+    }
+
+    /* —— Animated galaxy backdrop —— */
+    .galaxy-stage {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+      background:
+        radial-gradient(120% 80% at 50% 115%, rgba(40,26,92,0.55), transparent 50%),
+        radial-gradient(90% 60% at 10% -5%, rgba(22,72,118,0.45), transparent 52%),
+        linear-gradient(180deg, #020212 0%, #08051c 42%, #0a0628 72%, #040214 100%);
+    }
+    .galaxy-band {
+      position: absolute;
+      inset: -35% -15%;
+      background: linear-gradient(
+        132deg,
+        transparent 38%,
+        rgba(154,143,232,0.11) 45%,
+        rgba(220,238,255,0.16) 48.5%,
+        rgba(120,210,245,0.1) 51%,
+        transparent 61%
+      );
+      transform-origin: center;
+      opacity: 0.85;
+      animation: galaxy-tilt 50s ease-in-out infinite alternate;
+    }
+    @keyframes galaxy-tilt {
+      from { transform: rotate(-14deg) scale(1); }
+      to   { transform: rotate(-18deg) scale(1.04); }
+    }
+    .galaxy-blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(72px);
+      mix-blend-mode: screen;
+      opacity: 0.38;
+      will-change: transform;
+    }
+    .galaxy-blob--a {
+      width: clamp(340px, 52vmin, 520px);
+      height: clamp(340px, 52vmin, 520px);
+      background: radial-gradient(circle at 35% 40%, rgba(154,117,255,0.95), rgba(74,42,158,0.5) 50%, transparent 72%);
+      top: -14%;
+      left: -18%;
+      animation: blob-a 26s ease-in-out infinite alternate;
+    }
+    .galaxy-blob--b {
+      width: clamp(380px, 58vmin, 600px);
+      height: clamp(380px, 58vmin, 600px);
+      background: radial-gradient(circle at 55% 55%, rgba(78,226,217,0.55), rgba(24,112,148,0.45) 55%, transparent 70%);
+      bottom: -22%;
+      right: -20%;
+      animation: blob-b 32s ease-in-out infinite alternate;
+    }
+    .galaxy-blob--c {
+      width: clamp(280px, 44vmin, 420px);
+      height: clamp(280px, 44vmin, 420px);
+      background: radial-gradient(circle at 50% 50%, rgba(255,143,209,0.45), rgba(120,62,148,0.35) 60%, transparent 75%);
+      top: 36%;
+      right: -6%;
+      animation: blob-c 21s ease-in-out infinite alternate;
+    }
+    @keyframes blob-a {
+      from { transform: translate(0, 0) scale(1); }
+      to   { transform: translate(8%, 12%) scale(1.08); }
+    }
+    @keyframes blob-b {
+      from { transform: translate(0, 0) scale(1.02); }
+      to   { transform: translate(-10%, -6%) scale(1); }
+    }
+    @keyframes blob-c {
+      from { transform: translate(0, 0); }
+      to   { transform: translate(-14%, 8%) rotate(25deg); }
+    }
+    .galaxy-stars {
+      position: absolute;
+      inset: 0;
+      background-repeat: repeat;
+      will-change: transform;
+      opacity: 0.72;
+      /* Dense tiling starfield */
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Cg fill='%23ffffff'%3E%3Ccircle cx='20' cy='18' r='0.85' opacity='0.92'/%3E%3Ccircle cx='88' cy='42' r='0.55' opacity='0.62'/%3E%3Ccircle cx='160' cy='12' r='0.65' opacity='0.82'/%3E%3Ccircle cx='220' cy='68' r='0.45' opacity='0.5'/%3E%3Ccircle cx='300' cy='36' r='0.72' opacity='0.85'/%3E%3Ccircle cx='360' cy='95' r='0.52' opacity='0.52'/%3E%3Ccircle cx='45' cy='110' r='0.62' opacity='0.74'/%3E%3Ccircle cx='128' cy='140' r='0.42' opacity='0.43'/%3E%3Ccircle cx='200' cy='95' r='0.92' opacity='0.94'/%3E%3Ccircle cx='270' cy='148' r='0.52' opacity='0.61'/%3E%3Ccircle cx='340' cy='180' r='0.65' opacity='0.71'/%3E%3Ccircle cx='12' cy='200' r='0.48' opacity='0.45'/%3E%3Ccircle cx='75' cy='220' r='0.68' opacity='0.76'/%3E%3Ccircle cx='195' cy='188' r='0.54' opacity='0.53'/%3E%3Ccircle cx='320' cy='238' r='0.76' opacity='0.82'/%3E%3Ccircle cx='388' cy='210' r='0.52' opacity='0.53'/%3E%3Ccircle cx='50' cy='270' r='0.82' opacity='0.74'/%3E%3Ccircle cx='120' cy='310' r='0.52' opacity='0.62'/%3E%3Ccircle cx='250' cy='285' r='0.92' opacity='0.93'/%3E%3Ccircle cx='365' cy='298' r='0.62' opacity='0.71'/%3E%3Ccircle cx='30' cy='340' r='0.72' opacity='0.71'/%3E%3Ccircle cx='180' cy='355' r='0.62' opacity='0.73'/%3E%3Ccircle cx='330' cy='378' r='0.92' opacity='0.93'/%3E%3Ccircle cx='280' cy='12' r='1.08' opacity='0.93'/%3E%3Ccircle cx='40' cy='350' r='0.92' opacity='0.85'/%3E%3Ccircle cx='100' cy='90' r='0.72' opacity='0.93'/%3E%3Ccircle cx='100' cy='390' r='1.2' opacity='0.9'/%3E%3Ccircle cx='200' cy='10' r='1.05' opacity='0.93'/%3E%3Ccircle cx='200' cy='395' r='1.05' opacity='0.93'/%3E%3Ccircle cx='10' cy='295' r='1.08' opacity='0.93'/%3E%3Ccircle cx='390' cy='60' r='1.06' opacity='0.93'/%3E%3Ccircle cx='200' cy='200' r='1.95' opacity='0.94'/%3E%3Ccircle cx='15' cy='392' r='2.08' opacity='0.93'/%3E%3C/g%3E%3C/svg%3E");
+      background-size: 420px 420px;
+      animation: galaxy-drift 140s linear infinite;
+    }
+    .galaxy-stars-twinkle {
+      position: absolute;
+      inset: 0;
+      background-repeat: repeat;
+      will-change: transform, opacity, filter;
+      mix-blend-mode: screen;
+      opacity: 0.36;
+      /* Brighter cyan pinpoints offset from main field */
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Cg fill='%23dff6ff'%3E%3Ccircle cx='52' cy='44' r='0.72' opacity='0.8'/%3E%3Ccircle cx='174' cy='28' r='0.92' opacity='0.86'/%3E%3Ccircle cx='306' cy='72' r='0.72' opacity='0.73'/%3E%3Ccircle cx='364' cy='168' r='0.92' opacity='0.88'/%3E%3Ccircle cx='96' cy='182' r='0.92' opacity='0.9'/%3E%3Ccircle cx='244' cy='204' r='0.76' opacity='0.75'/%3E%3Ccircle cx='328' cy='292' r='0.92' opacity='0.84'/%3E%3Ccircle cx='64' cy='312' r='0.92' opacity='0.9'/%3E%3Ccircle cx='198' cy='358' r='0.92' opacity='0.88'/%3E%3Ccircle cx='312' cy='348' r='0.92' opacity='0.9'/%3E%3Ccircle cx='392' cy='296' r='0.92' opacity='0.93'/%3E%3Ccircle cx='22' cy='126' r='0.92' opacity='0.93'/%3E%3Ccircle cx='288' cy='392' r='1.62' opacity='0.93'/%3E%3Ccircle cx='142' cy='392' r='2.92' opacity='0.93'/%3E%3Ccircle cx='200' cy='200' r='1.92' opacity='0.93'/%3E%3Ccircle cx='392' cy='392' r='1.15' opacity='0.76'/%3E%3C/g%3E%3C/svg%3E");
+      background-size: 380px 380px;
+      background-position: 90px 40px;
+      animation: galaxy-drift 180s linear infinite reverse, galaxy-twinkle 7s ease-in-out infinite alternate;
+    }
+    @keyframes galaxy-drift {
+      from { transform: translate(0, 0); }
+      to   { transform: translate(-420px, -220px); }
+    }
+    @keyframes galaxy-twinkle {
+      from { opacity: 0.22; filter: hue-rotate(-6deg); }
+      to   { opacity: 0.44; filter: hue-rotate(14deg); }
+    }
+    .galaxy-vignette {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 48% 40%, transparent 42%, rgba(2, 2, 18, 0.55) 100%);
+      opacity: 0.9;
+      pointer-events: none;
+    }
+    .galaxy-dust {
+      position: absolute;
+      inset: -2px;
+      background-image: radial-gradient(rgba(255,255,255,0.03) 0.55px, transparent 0.6px);
+      background-size: 3px 3px;
+      opacity: 0.45;
+      mix-blend-mode: overlay;
+      mask-image: radial-gradient(ellipse 85% 70% at 50% 42%, black 38%, transparent 100%);
+      animation: galaxy-drift 380s linear infinite;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .galaxy-band,
+      .galaxy-blob--a,
+      .galaxy-blob--b,
+      .galaxy-blob--c,
+      .galaxy-stars,
+      .galaxy-stars-twinkle,
+      .galaxy-dust {
+        animation: none !important;
+      }
+      .galaxy-stars-twinkle {
+        opacity: 0.3;
+      }
+    }
+
+    .layout {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: row;
+      align-items: stretch;
+      min-height: 100vh;
+      min-height: 100dvh;
+    }
+
+    /** Sidebar wrapper: narrows to a PIN strip when collapsed (desktop only) */
+    .rail-container {
+      display: flex;
+      flex-direction: row;
+      align-items: stretch;
+      flex-shrink: 0;
+      overflow: hidden;
+      width: calc(var(--rail-hit) + var(--rail-inner-width));
+      border-right: 1px solid rgba(255,255,255,0.07);
+      background: rgba(6, 8, 28, 0.38);
+      backdrop-filter: blur(18px) saturate(1.25);
+      -webkit-backdrop-filter: blur(18px) saturate(1.25);
+      box-shadow: inset -1px 0 0 rgba(255,255,255,0.04), 4px 0 48px rgba(0, 0, 0, 0.35);
+      transition: width 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .rail-container.is-collapsed {
+      width: var(--rail-hit);
+    }
+    .rail-toggle {
+      display: none;
+      flex-shrink: 0;
+      width: var(--rail-hit);
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      margin: 0;
+      border: none;
+      border-right: 1px solid rgba(255,255,255,0.07);
+      background: rgba(0, 0, 0, 0.28);
+      color: rgba(232,234,246,0.72);
+      cursor: pointer;
+      transition: background 0.18s ease, color 0.18s ease;
+    }
+    .rail-toggle:focus-visible {
+      outline: 2px solid rgba(157,143,250,0.75);
+      outline-offset: -2px;
+    }
+    .rail-toggle:hover {
+      background: rgba(124,108,240,0.18);
+      color: #eef0fb;
+    }
+    .rail-toggle svg {
+      display: block;
+      transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+      flex-shrink: 0;
+    }
+    .rail-container.is-collapsed .rail-toggle svg {
+      transform: scaleX(-1);
+    }
+
+    .rail {
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+      width: var(--rail-inner-width);
+      flex-shrink: 0;
+      padding: 1.5rem 1.25rem;
+    }
+
+    @media (min-width: 761px) {
+      .layout {
+        min-height: 0;
+        height: 100vh;
+        height: 100dvh;
+        max-height: 100vh;
+        max-height: 100dvh;
+        overflow: hidden;
+      }
+      .rail-container {
+        align-self: stretch;
+        min-height: 0;
+      }
+      .rail {
+        min-height: 0;
+        flex: 1 1 auto;
+        height: 100%;
+        max-height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+      }
+      .main-area {
+        overflow: hidden;
+      }
+      .panel-shell {
+        overflow-x: hidden;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+      }
+      .rail-toggle {
+        display: flex;
+      }
+    }
+    @media (max-width: 760px) {
+      html {
+        height: auto;
+      }
+      body {
+        height: auto;
+        overflow: auto;
+      }
+      .layout {
+        flex-direction: column;
+        height: auto;
+        max-height: none;
+        overflow: visible;
+      }
+      .rail-container {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        transition: none;
+        overflow: visible;
+      }
+      .rail-container.is-collapsed {
+        width: 100%;
+      }
+      .rail {
+        width: 100%;
+        min-width: 0;
+        min-height: 0;
+        overflow: visible;
+        height: auto;
+        max-height: none;
+        flex: none;
+      }
+      .main-area {
+        overflow: visible;
+      }
+      .panel-shell {
+        overflow: visible;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .rail-container {
+        transition: none;
+      }
+      .rail-toggle svg {
+        transition: none;
+      }
+      .brand-gradient {
+        animation: none;
+        background-position: 50% center;
+      }
+      .rail-settings-chevron,
+      .rail-settings[open] .rail-settings-chevron {
+        transition: none;
+      }
+      .brand-logo {
+        transition: filter 0.2s ease, box-shadow 0.2s ease;
+      }
+      .brand-logo-wrap:hover .brand-logo {
+        transform: none;
+      }
+    }
+    .rail-footer {
+      margin-top: auto;
+      padding-top: 1.25rem;
+    }
+    .rail-footer .muted-code {
+      margin-top: 0;
+    }
+    .brand-lockup {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin: 0 0 0.75rem;
+      min-width: 0;
+    }
+    .brand-logo-wrap {
+      flex-shrink: 0;
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+    }
+    .brand-logo {
+      display: block;
+      width: 52px;
+      height: 52px;
+      object-fit: contain;
+      flex-shrink: 0;
+      border-radius: 14px;
+      background: #050508;
+      transition:
+        filter 0.35s ease,
+        box-shadow 0.35s ease,
+        transform 0.35s ease;
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.06),
+        0 10px 36px rgba(0, 0, 0, 0.45),
+        0 0 28px color-mix(in srgb, var(--brand-magenta) 40%, transparent),
+        0 0 40px color-mix(in srgb, var(--brand-cyan) 28%, transparent);
+    }
+    .brand-logo-wrap:hover .brand-logo {
+      filter: brightness(1.35) contrast(1.05) saturate(1.15);
+      transform: scale(1.05);
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.18),
+        0 12px 40px rgba(0, 0, 0, 0.5),
+        0 0 48px color-mix(in srgb, var(--brand-magenta) 62%, transparent),
+        0 0 64px color-mix(in srgb, var(--brand-cyan) 48%, transparent),
+        0 0 100px color-mix(in srgb, var(--accent) 22%, transparent);
+    }
+    .brand {
+      margin: 0;
+      min-width: 0;
+      font-family: Syne, Inter, system-ui, sans-serif;
+      font-size: clamp(1.05rem, 2.6vw, 1.22rem);
+      font-weight: 800;
+      letter-spacing: -0.035em;
+      line-height: 1.12;
+    }
+    .brand-gradient {
+      display: block;
+      background: linear-gradient(
+        118deg,
+        #ff5cd6 0%,
+        var(--brand-magenta) 24%,
+        #8b62ff 52%,
+        var(--brand-cyan) 100%
+      );
+      background-size: 200% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      filter: drop-shadow(0 2px 16px color-mix(in srgb, var(--brand-magenta) 35%, transparent));
+      animation: brand-shine 8s ease-in-out infinite alternate;
+    }
+    @keyframes brand-shine {
+      from {
+        background-position: 0% center;
+        filter: drop-shadow(0 2px 14px color-mix(in srgb, var(--brand-magenta) 38%, transparent));
+      }
+      to {
+        background-position: 100% center;
+        filter: drop-shadow(0 2px 18px color-mix(in srgb, var(--brand-cyan) 40%, transparent));
+      }
+    }
+    .tagline {
+      margin: 0 0 1.85rem;
+      font-size: 0.8125rem;
+      color: var(--muted);
+      line-height: 1.48;
+      text-wrap: balance;
+    }
+    nav[aria-label="Products"] {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    nav[aria-label="Products"] button {
+      appearance: none;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      text-align: left;
+      font: inherit;
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 11px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition:
+        color 0.18s ease,
+        border-color 0.18s ease,
+        background 0.18s ease,
+        box-shadow 0.2s ease,
+        transform 0.18s ease;
+    }
+    nav[aria-label="Products"] button:hover {
+      color: var(--text);
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.1);
+      transform: translateX(2px);
+    }
+    nav[aria-label="Products"] button[aria-selected="true"] {
+      color: var(--text);
+      border-color: rgba(157,143,250,0.55);
+      background: linear-gradient(
+        135deg,
+        rgba(124,108,240,0.22) 0%,
+        rgba(78,226,217,0.12) 100%
+      );
+      box-shadow:
+        0 0 28px rgba(124,108,240,0.18),
+        inset 0 0 24px rgba(255,255,255,0.04);
+    }
+    .main-area {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      background: radial-gradient(
+        ellipse 140% 100% at 70% -10%,
+        rgba(154,143,232,0.06),
+        transparent 55%
+      );
+    }
+    .panel-shell {
+      flex: 1;
+      padding: clamp(1.25rem, 3vw, 2.25rem);
+      min-height: 0;
+    }
+    section[hidden] {
+      display: none !important;
+    }
+
+    html[data-theme="light"] {
+      color-scheme: light;
+    }
+    html[data-theme="light"] {
+      --surface: rgba(255, 255, 255, 0.72);
+      --border: rgba(15, 23, 36, 0.12);
+      --text: #121826;
+      --muted: rgba(18, 22, 38, 0.58);
+    }
+    html[data-theme="light"] body {
+      background: #eceef4;
+      color: var(--text);
+    }
+    html[data-theme="light"] .galaxy-stage {
+      opacity: 0.42;
+      filter: saturate(0.92);
+    }
+    html[data-theme="light"] .galaxy-stars,
+    html[data-theme="light"] .galaxy-stars-twinkle {
+      opacity: 0.28 !important;
+    }
+    html[data-theme="light"] .rail-container {
+      border-right-color: rgba(15, 23, 36, 0.1);
+      background: rgba(255, 255, 255, 0.76);
+      box-shadow:
+        inset -1px 0 0 rgba(15, 23, 36, 0.06),
+        4px 0 32px rgba(15, 23, 36, 0.06);
+    }
+    html[data-theme="light"] .rail-toggle {
+      border-right-color: rgba(15, 23, 36, 0.1);
+      background: rgba(245, 247, 250, 0.95);
+      color: rgba(18, 22, 38, 0.55);
+    }
+    html[data-theme="light"] .rail-toggle:hover {
+      background: var(--accent-soft);
+      color: var(--accent-2);
+    }
+    html[data-theme="light"] .rail {
+      border-color: transparent;
+    }
+    html[data-theme="light"] .tagline {
+      color: var(--muted);
+    }
+    html[data-theme="light"] .brand-logo {
+      background: rgba(245, 247, 250, 0.95);
+      box-shadow:
+        0 0 0 1px rgba(15, 23, 36, 0.08),
+        0 8px 28px rgba(15, 23, 36, 0.1),
+        0 0 24px color-mix(in srgb, var(--brand-magenta) 22%, transparent),
+        0 0 32px color-mix(in srgb, var(--brand-cyan) 18%, transparent);
+    }
+    html[data-theme="light"] .brand-logo-wrap:hover .brand-logo {
+      filter: brightness(1.12) contrast(1.03) saturate(1.12);
+      box-shadow:
+        0 0 0 1px rgba(15, 23, 36, 0.12),
+        0 10px 36px rgba(15, 23, 36, 0.14),
+        0 0 40px color-mix(in srgb, var(--brand-magenta) 38%, transparent),
+        0 0 52px color-mix(in srgb, var(--brand-cyan) 32%, transparent),
+        0 0 72px color-mix(in srgb, var(--accent) 18%, transparent);
+    }
+    html[data-theme="light"] nav[aria-label="Products"] button {
+      color: var(--muted);
+    }
+    html[data-theme="light"] nav[aria-label="Products"] button:hover {
+      color: var(--text);
+      background: rgba(15, 23, 36, 0.04);
+      border-color: rgba(15, 23, 36, 0.1);
+    }
+    html[data-theme="light"] nav[aria-label="Products"] button[aria-selected="true"] {
+      color: var(--text);
+      border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+      background: linear-gradient(
+        135deg,
+        var(--accent-soft) 0%,
+        rgba(255, 255, 255, 0.85) 100%
+      );
+      box-shadow: 0 0 28px rgba(15, 23, 36, 0.06);
+    }
+    html[data-theme="light"] .main-area {
+      background: radial-gradient(
+        ellipse 140% 100% at 70% -10%,
+        var(--accent-soft),
+        transparent 52%
+      );
+    }
+    html[data-theme="light"] .welcome .welcome-chip {
+      border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+      background: var(--accent-soft);
+      color: var(--accent-2);
+    }
+    html[data-theme="light"] .welcome h2 {
+      text-shadow: none;
+      color: var(--text);
+    }
+    html[data-theme="light"] .welcome p strong {
+      color: #0d1424;
+      font-weight: 650;
+    }
+    html[data-theme="light"] .welcome-credit {
+      border-color: rgba(15, 23, 36, 0.1);
+      background: rgba(255, 255, 255, 0.65);
+      box-shadow: 0 2px 20px rgba(15, 23, 36, 0.04);
+    }
+    html[data-theme="light"] .made-by {
+      border-top-color: rgba(15, 23, 36, 0.08);
+    }
+    html[data-theme="light"] .muted-code code {
+      color: #243047;
+      background: rgba(15, 23, 36, 0.05);
+    }
+    html[data-theme="light"] .serial-sheet h2 {
+      color: var(--text);
+    }
+    html[data-theme="light"] .serial-lead {
+      color: var(--muted);
+    }
+    html[data-theme="light"] .serial-exe-opt {
+      color: var(--muted);
+    }
+    html[data-theme="light"] .serial-banner {
+      border-color: rgba(255, 196, 108, 0.35);
+      background: rgba(255, 196, 108, 0.1);
+      color: #5a4818;
+    }
+    html[data-theme="light"] .serial-btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 4px 22px color-mix(in srgb, var(--accent) 35%, transparent);
+    }
+    html[data-theme="light"] .serial-btn-ghost {
+      border-color: rgba(15, 23, 36, 0.14);
+      background: rgba(255, 255, 255, 0.7);
+      color: var(--text);
+    }
+    html[data-theme="light"] .exe-console {
+      background: rgba(15, 23, 36, 0.04);
+      border-color: rgba(15, 23, 36, 0.1);
+      color: #253045;
+    }
+    html[data-theme="light"] .external-serial-paste {
+      border-color: rgba(15, 23, 36, 0.12);
+      background: rgba(255, 255, 255, 0.88);
+      color: #253045;
+    }
+    html[data-theme="light"] .serial-compare-table th {
+      background: rgba(244, 246, 251, 0.95);
+      color: rgba(26, 28, 36, 0.88);
+      border-bottom-color: rgba(15, 23, 36, 0.08);
+    }
+    html[data-theme="light"] .serial-compare-table td {
+      border-bottom-color: rgba(15, 23, 36, 0.06);
+    }
+    html[data-theme="light"] .serial-compare-hit td:last-child {
+      color: rgba(22, 110, 60, 0.95);
+    }
+    html[data-theme="light"] .serial-compare-miss td:last-child {
+      color: rgba(156, 80, 0, 0.92);
+    }
+    html[data-theme="light"] .serial-compare-skip td {
+      color: rgba(90, 94, 108, 0.75);
+    }
+    html[data-theme="light"] .iframe-panel {
+      border-color: rgba(15, 23, 36, 0.12);
+      background: rgba(255, 255, 255, 0.5);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+    }
+    html[data-theme="light"] .external-exe-block {
+      border-color: rgba(15, 23, 36, 0.1);
+      background: rgba(255, 255, 255, 0.5);
+    }
+    html[data-theme="light"] .pc-block,
+    html[data-theme="light"] .pc-diag-bar {
+      background: rgba(255, 255, 255, 0.55);
+      border-color: rgba(15, 23, 36, 0.1);
+    }
+
+    .rail-settings {
+      margin-bottom: 0.75rem;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      background: rgba(255, 255, 255, 0.04);
+      overflow: hidden;
+    }
+    .rail-settings summary {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 12px;
+      font-size: 0.8125rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text);
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s ease;
+    }
+    .rail-settings summary::-webkit-details-marker {
+      display: none;
+    }
+    .rail-settings summary:hover {
+      background: rgba(255, 255, 255, 0.04);
+    }
+    .rail-settings-chevron {
+      flex-shrink: 0;
+      opacity: 0.55;
+      transition: transform 0.2s ease, opacity 0.15s ease;
+    }
+    .rail-settings[open] .rail-settings-chevron {
+      transform: rotate(180deg);
+      opacity: 0.85;
+    }
+    .rail-settings-body {
+      padding: 8px 12px 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    html[data-theme="light"] .rail-settings {
+      border-color: rgba(15, 23, 36, 0.1);
+      background: rgba(255, 255, 255, 0.65);
+      box-shadow: 0 2px 16px rgba(15, 23, 36, 0.04);
+    }
+    html[data-theme="light"] .rail-settings-body {
+      border-top-color: rgba(15, 23, 36, 0.08);
+    }
+    html[data-theme="light"] .rail-settings summary:hover {
+      background: rgba(15, 23, 36, 0.03);
+    }
+    .rail-settings .setting-block {
+      margin-bottom: 1rem;
+    }
+    .rail-settings .setting-block:last-child {
+      margin-bottom: 0;
+    }
+    .rail-settings .setting-block h4 {
+      margin: 0 0 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+    .rail-settings .setting-block-hint {
+      margin: 0 0 8px;
+      font-size: 0.75rem;
+      line-height: 1.45;
+      color: var(--muted);
+    }
+    .rail-settings .theme-toggle {
+      display: inline-flex;
+      width: 100%;
+      box-sizing: border-box;
+      background: rgba(127, 127, 127, 0.12);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 3px;
+      gap: 2px;
+    }
+    .rail-settings .theme-mode {
+      flex: 1;
+      justify-content: center;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: transparent;
+      border: 0;
+      color: var(--muted);
+      padding: 8px 8px;
+      border-radius: 7px;
+      font-family: inherit;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.14s ease, color 0.14s ease, box-shadow 0.14s ease;
+    }
+    .rail-settings .theme-mode[aria-pressed="true"] {
+      background: var(--surface);
+      color: var(--accent);
+      box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12);
+    }
+    html[data-theme="light"] .rail-settings .theme-mode[aria-pressed="true"] {
+      background: #fff;
+      box-shadow: 0 1px 6px rgba(15, 23, 36, 0.08);
+    }
+    .rail-settings .accent-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 7px;
+      width: 100%;
+      max-width: none;
+      box-sizing: border-box;
+    }
+    .rail-settings .accent-swatch {
+      aspect-ratio: 1;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      background: linear-gradient(135deg, var(--c1), var(--c2));
+      cursor: pointer;
+      padding: 0;
+      min-width: 0;
+      transition: transform 0.14s ease, border-color 0.14s ease, box-shadow 0.14s ease;
+    }
+    .rail-settings .accent-swatch:hover {
+      transform: scale(1.08);
+    }
+    .rail-settings .accent-swatch[aria-pressed="true"] {
+      border-color: var(--text);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+      transform: scale(1.05);
+    }
+    .rail-settings .setting-footnote {
+      margin: 10px 0 0;
+      font-size: 0.6875rem;
+      line-height: 1.45;
+      color: var(--muted);
+    }
+
+    .rail-changelog {
+      margin-bottom: 0.75rem;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      background: rgba(255, 255, 255, 0.04);
+      overflow: hidden;
+    }
+    .rail-changelog summary {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 12px;
+      font-size: 0.8125rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text);
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s ease;
+    }
+    .rail-changelog summary::-webkit-details-marker {
+      display: none;
+    }
+    .rail-changelog summary:hover {
+      background: rgba(255, 255, 255, 0.04);
+    }
+    .rail-changelog-body {
+      padding: 8px 12px 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .rail-meta-version {
+      margin: 0 0 8px;
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-family: JetBrains Mono, ui-monospace, monospace;
+    }
+    .changelog-pre {
+      margin: 0;
+      padding: 10px;
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.22);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      color: rgba(232, 235, 248, 0.88);
+      font-family: JetBrains Mono, ui-monospace, monospace;
+      font-size: 0.68rem;
+      line-height: 1.52;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: min(38vh, 320px);
+      overflow: auto;
+    }
+    html[data-theme="light"] .rail-changelog {
+      border-color: rgba(15, 23, 36, 0.1);
+      background: rgba(255, 255, 255, 0.65);
+      box-shadow: 0 2px 16px rgba(15, 23, 36, 0.04);
+    }
+    html[data-theme="light"] .rail-changelog-body {
+      border-top-color: rgba(15, 23, 36, 0.08);
+    }
+    html[data-theme="light"] .rail-changelog summary:hover {
+      background: rgba(15, 23, 36, 0.03);
+    }
+    html[data-theme="light"] .changelog-pre {
+      background: rgba(15, 23, 36, 0.04);
+      border-color: rgba(15, 23, 36, 0.1);
+      color: #243047;
+    }
+
+    .url-check-form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: stretch;
+    }
+    .url-check-form input[type='text'] {
+      flex: 1;
+      min-width: 180px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(4, 5, 16, 0.55);
+      color: var(--text);
+      font: inherit;
+      font-size: 0.875rem;
+    }
+    .url-check-form input[type='text']::placeholder {
+      color: rgba(238, 240, 248, 0.35);
+    }
+    .url-check-form input[type='text']:focus {
+      outline: 2px solid color-mix(in srgb, var(--accent) 55%, transparent);
+      outline-offset: 1px;
+    }
+    html[data-theme='light'] .url-check-form input[type='text'] {
+      border-color: rgba(15, 23, 36, 0.14);
+      background: rgba(255, 255, 255, 0.82);
+      color: var(--text);
+    }
+    .url-find-warn {
+      border-left: 3px solid #ffb8bf;
+      padding: 10px 12px;
+      margin: 10px 0;
+      border-radius: 0 10px 10px 0;
+      background: rgba(255, 90, 110, 0.07);
+      font-size: 0.84rem;
+    }
+    .url-find-notice {
+      border-left: 3px solid rgba(157, 143, 250, 0.65);
+      padding: 10px 12px;
+      margin: 10px 0;
+      border-radius: 0 10px 10px 0;
+      background: rgba(124, 108, 240, 0.08);
+      font-size: 0.82rem;
+    }
+    html[data-theme='light'] .url-find-warn {
+      background: rgba(255, 90, 110, 0.08);
+    }
+    html[data-theme='light'] .url-find-notice {
+      background: rgba(124, 108, 240, 0.1);
+    }
+    .url-risk-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .url-risk-low {
+      background: rgba(94, 226, 122, 0.15);
+      color: #7fe899;
+      border: 1px solid rgba(94, 226, 122, 0.35);
+    }
+    .url-risk-elevated {
+      background: rgba(255, 196, 108, 0.12);
+      color: #ffd28a;
+      border: 1px solid rgba(255, 196, 108, 0.3);
+    }
+    .url-risk-medium {
+      background: rgba(255, 148, 77, 0.14);
+      color: #ffb48a;
+      border: 1px solid rgba(255, 148, 77, 0.35);
+    }
+    .url-risk-high {
+      background: rgba(255, 90, 110, 0.14);
+      color: #ffb8bf;
+      border: 1px solid rgba(255, 90, 110, 0.4);
+    }
+    html[data-theme='light'] .url-risk-low {
+      color: #1a6b34;
+      background: rgba(94, 226, 122, 0.2);
+    }
+    html[data-theme='light'] .url-risk-elevated {
+      color: #7a5410;
+    }
+    html[data-theme='light'] .url-risk-medium {
+      color: #8a4a18;
+    }
+    html[data-theme='light'] .url-risk-high {
+      color: #9a2835;
+    }
+    pre.url-chain-pre {
+      margin: 12px 0 0;
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 0.74rem;
+      max-height: 240px;
+      overflow: auto;
+    }
+
+    .welcome {
+      max-width: 560px;
+      padding: 0.65rem 0.25rem;
+    }
+    /* Home: text column + hero image on wide viewports */
+    .welcome-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(180px, min(36vw, 320px));
+      gap: clamp(1.25rem, 4vw, 3rem);
+      align-items: start;
+      max-width: min(1120px, 100%);
+    }
+    .welcome-layout .welcome-main {
+      max-width: min(620px, 100%);
+    }
+    .welcome-hero-art {
+      position: sticky;
+      top: clamp(1rem, 3vh, 2rem);
+      justify-self: end;
+      width: 100%;
+      max-width: 320px;
+    }
+    .welcome-hero-frame {
+      border-radius: 22px;
+      padding: clamp(0.55rem, 1.8vw, 0.85rem);
+      /* Mostly transparent — galaxy backdrop shows through */
+      background: rgba(255, 255, 255, 0.045);
+      backdrop-filter: blur(16px) saturate(1.12);
+      -webkit-backdrop-filter: blur(16px) saturate(1.12);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      box-shadow:
+        0 10px 36px rgba(0, 0, 0, 0.22),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        0 0 40px color-mix(in srgb, var(--brand-magenta) 8%, transparent);
+    }
+    .welcome-hero-crop {
+      border-radius: 16px;
+      overflow: hidden;
+      aspect-ratio: 3 / 4;
+      max-height: min(68vh, 480px);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.2);
+    }
+    .welcome-hero-img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 30%;
+      filter: saturate(1.04) contrast(1.02);
+    }
+    @supports not ((backdrop-filter: blur(12px)) or (-webkit-backdrop-filter: blur(12px))) {
+      .welcome-hero-frame {
+        background: rgba(12, 14, 36, 0.62);
+      }
+    }
+    html[data-theme='light'] .welcome-hero-frame {
+      background: rgba(255, 255, 255, 0.22);
+      backdrop-filter: blur(18px) saturate(1.05);
+      -webkit-backdrop-filter: blur(18px) saturate(1.05);
+      border-color: rgba(255, 255, 255, 0.55);
+      box-shadow:
+        0 10px 36px rgba(15, 23, 36, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.65),
+        0 0 28px color-mix(in srgb, var(--brand-magenta) 6%, transparent);
+    }
+    html[data-theme='light'] .welcome-hero-crop {
+      box-shadow: 0 10px 28px rgba(15, 23, 36, 0.1);
+    }
+    html[data-theme='light'] #license-gen-product,
+    html[data-theme='light'] #license-gen-count,
+    html[data-theme='light'] #license-gen-duration,
+    html[data-theme='light'] #license-gen-note,
+    html[data-theme='light'] #license-keys-sort,
+    html[data-theme='light'] #license-keys-filter-product,
+    html[data-theme='light'] #license-keys-filter-plan,
+    html[data-theme='light'] #license-product-name,
+    html[data-theme='light'] #license-product-desc,
+    html[data-theme='light'] #panel-license .license-field-input {
+      border-color: rgba(15, 23, 36, 0.14) !important;
+      background: rgba(255, 255, 255, 0.92) !important;
+      color: var(--text) !important;
+    }
+    @supports not ((backdrop-filter: blur(12px)) or (-webkit-backdrop-filter: blur(12px))) {
+      html[data-theme='light'] .welcome-hero-frame {
+        background: rgba(250, 251, 254, 0.88);
+      }
+    }
+    @media (max-width: 900px) {
+      .welcome-layout {
+        grid-template-columns: 1fr;
+      }
+      .welcome-hero-art {
+        position: relative;
+        top: auto;
+        justify-self: center;
+        max-width: 260px;
+        order: -1;
+      }
+      .welcome-layout .welcome-main {
+        max-width: none;
+      }
+    }
+    .welcome .welcome-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.38rem;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      padding: 0.35rem 0.72rem;
+      border-radius: 999px;
+      border: 1px solid color-mix(in srgb, var(--accent) 42%, rgba(255,255,255,0.15));
+      background: var(--accent-soft);
+      color: #d8d4ff;
+      margin-bottom: 12px;
+    }
+    .welcome h2 {
+      margin: 0 0 14px;
+      font-family: Syne, Inter, system-ui, sans-serif;
+      font-size: clamp(1.42rem, 3.2vw, 2rem);
+      font-weight: 800;
+      letter-spacing: -0.035em;
+      line-height: 1.14;
+      text-shadow: 0 2px 40px rgba(130,167,255,0.2);
+    }
+    .welcome p {
+      margin: 0 0 12px;
+      color: var(--muted);
+      line-height: 1.62;
+      font-size: 0.9425rem;
+    }
+    .welcome p strong { color: #f0eefc; font-weight: 640; }
+    .welcome-viewer-title {
+      margin: 0 0 10px;
+      font-family: Syne, Inter, system-ui, sans-serif;
+      font-size: 1.06rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+    .welcome-credit {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-top: 1.75rem;
+      padding: 14px 16px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.09);
+      background: rgba(255,255,255,0.04);
+      max-width: 420px;
+    }
+    .welcome-credit img {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+      border: 2px solid rgba(157,143,250,0.5);
+      box-shadow: 0 6px 28px rgba(0,0,0,0.4), 0 0 20px rgba(124,108,240,0.15);
+    }
+    .welcome-credit .credit-lines {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+    .welcome-credit .credit-tag {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(238,240,248,0.45);
+    }
+    .welcome-credit .credit-name {
+      font-family: Syne, Inter, system-ui, sans-serif;
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(120deg, #f0ecff, #a79cff 40%, #7dedff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .made-by {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .made-by img {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+      border: 2px solid rgba(157,143,250,0.45);
+      box-shadow: 0 5px 22px rgba(0,0,0,0.38);
+    }
+    .made-by .credit-lines {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+    .made-by .credit-tag {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(238,240,248,0.42);
+    }
+    .made-by .credit-name {
+      font-family: Syne, Inter, system-ui, sans-serif;
+      font-weight: 800;
+      font-size: 0.98rem;
+      letter-spacing: -0.02em;
+      color: #eef0fb;
+    }
+    .iframe-panel {
+      width: 100%;
+      flex: 1;
+      padding: 0;
+      overflow: hidden;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(4, 5, 16, 0.65);
+      box-shadow:
+        0 0 0 1px rgba(124,108,240,0.12),
+        0 32px 100px rgba(0,0,0,0.55),
+        0 -8px 60px rgba(124,108,240,0.08);
+      min-height: min(680px, calc(100vh - 3rem));
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .iframe-panel iframe {
+      width: 100%;
+      height: min(760px, calc(100vh - 56px));
+      min-height: 560px;
+      border: none;
+      display: block;
+      border-radius: 15px;
+    }
+    @media (max-width: 760px) {
+      .iframe-panel iframe { height: calc(100vh - 220px); min-height: 400px; }
+    }
+    .muted-code {
+      margin-top: 1.25rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+      padding: 11px 13px;
+      border-radius: 11px;
+      background: rgba(255,255,255,0.035);
+      border: 1px solid rgba(255,255,255,0.08);
+      backdrop-filter: blur(8px);
+    }
+    .muted-code code { color: #f3f6ff; font-size: inherit; word-break: break-all; }
+
+    /* —— PC serial checker (reads this machine via /api/pc-serials) —— */
+    .serial-sheet {
+      max-width: min(1280px, 100%);
+    }
+    .serial-sheet h2 {
+      margin: 0 0 10px;
+      font-family: Syne, Inter, system-ui, sans-serif;
+      font-size: clamp(1.35rem, 3vw, 1.85rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+    .serial-lead {
+      margin: 0 0 14px;
+      font-size: 0.895rem;
+      line-height: 1.56;
+      color: var(--muted);
+    }
+    .serial-banner {
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      color: rgba(238,240,248,0.72);
+      padding: 11px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,223,138,0.22);
+      background: rgba(255,196,108,0.07);
+      margin-bottom: 16px;
+    }
+    .serial-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .serial-btn-primary {
+      appearance: none;
+      border: 1px solid rgba(157,143,250,0.45);
+      background: linear-gradient(135deg, rgba(124,108,240,0.38), rgba(78,226,217,0.15));
+      color: var(--text);
+      font-weight: 600;
+      font-size: 0.875rem;
+      padding: 11px 20px;
+      border-radius: 11px;
+      cursor: pointer;
+      transition: filter 0.15s ease, transform 0.15s ease;
+    }
+    .serial-btn-primary:hover:not(:disabled) {
+      filter: brightness(1.08);
+      transform: translateY(-1px);
+    }
+    .serial-btn-primary:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .serial-btn-ghost {
+      appearance: none;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04);
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.875rem;
+      padding: 11px 18px;
+      border-radius: 11px;
+      cursor: pointer;
+    }
+    .serial-btn-ghost:hover:not(:disabled) {
+      color: var(--text);
+      border-color: rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.07);
+    }
+    .serial-btn-ghost:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    /* Serial checker tiles: tighter “dashboard” grouping (Threat tab uses separate #threat-mount) */
+    #pc-scan-mount.pc-grid-mount {
+      --pc-card-min: 300px;
+      gap: 6px;
+      padding: 8px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(0, 0, 0, 0.12);
+      box-sizing: border-box;
+    }
+    #pc-scan-mount.pc-grid-mount > .pc-block {
+      box-shadow: none;
+      border-color: rgba(255,255,255,0.07);
+      padding: 12px 14px 14px;
+    }
+
+    html[data-theme="light"] #pc-scan-mount.pc-grid-mount {
+      background: rgba(15, 23, 36, 0.035);
+      border-color: rgba(15, 23, 36, 0.1);
+    }
+    html[data-theme="light"] #pc-scan-mount.pc-grid-mount > .pc-block {
+      border-color: rgba(15, 23, 36, 0.1);
+      background: rgba(255, 255, 255, 0.55);
+    }
+
+    .pc-grid-mount {
+      display: grid;
+      grid-auto-flow: row;
+      align-items: start;
+      gap: 14px;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--pc-card-min, 280px)), 1fr));
+    }
+    .pc-grid-span-full {
+      grid-column: 1 / -1;
+    }
+    .pc-block {
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.09);
+      background: rgba(255,255,255,0.035);
+      padding: 14px 16px 16px;
+      min-width: 0;
+    }
+    .pc-block h3 {
+      margin: 0 0 10px;
+      font-family: Syne, Inter, system-ui, sans-serif;
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #e9ecfc;
+    }
+    .pc-dl {
+      display: grid;
+      grid-template-columns: minmax(120px, 180px) 1fr;
+      gap: 6px 12px;
+      font-size: 0.8375rem;
+      line-height: 1.45;
+    }
+    .pc-dl dt {
+      margin: 0;
+      color: rgba(238,240,248,0.52);
+      font-weight: 600;
+    }
+    .pc-dl dd {
+      margin: 0;
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 0.7825rem;
+      color: rgba(246,247,253,0.95);
+      word-break: break-all;
+    }
+    .pc-err-inline {
+      color: #ffb8bf;
+      font-size: 0.8375rem;
+      margin: 0;
+    }
+    .startup-mount .pc-disk-table td:last-child {
+      font-size: 0.72rem;
+      line-height: 1.4;
+    }
+
+    .disk-table-wrap {
+      overflow-x: auto;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.07);
+      margin-top: 6px;
+    }
+    table.pc-disk-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.755rem;
+    }
+    .pc-disk-table th,
+    .pc-disk-table td {
+      padding: 8px 10px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .pc-disk-table th {
+      font-weight: 650;
+      color: rgba(238,240,248,0.55);
+      background: rgba(0, 0, 0, 0.25);
+    }
+    .pc-disk-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+    .pc-diag-bar {
+      font-size: 0.8rem;
+      color: #ffe8aa;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,196,108,0.25);
+      background: rgba(80,62,34,0.22);
+      line-height: 1.45;
+    }
+    .external-exe-block {
+      margin-top: 22px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    /* Products & keys hub */
+    #panel-license .license-hub-top-actions {
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+    #panel-license .license-hub-grid {
+      display: grid;
+      gap: 18px;
+      margin-top: 16px;
+      grid-template-columns: 1fr;
+      align-items: start;
+    }
+    @media (min-width: 920px) {
+      #panel-license .license-hub-grid {
+        grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
+      }
+    }
+    #panel-license .license-card {
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(0, 0, 0, 0.2);
+      padding: 18px 20px 20px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+    }
+    html[data-theme='light'] #panel-license .license-card {
+      border-color: rgba(15, 23, 36, 0.11);
+      background: rgba(255, 255, 255, 0.58);
+      box-shadow: 0 8px 32px rgba(15, 23, 36, 0.07);
+    }
+    #panel-license .license-card > .external-exe-title:first-child {
+      margin-top: 0;
+      margin-bottom: 8px;
+    }
+    #panel-license .license-card-lead {
+      margin: 0 0 14px;
+      font-size: 0.84rem;
+      line-height: 1.5;
+      color: var(--muted);
+    }
+    #panel-license .license-add-form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: flex-end;
+      margin-bottom: 16px;
+    }
+    #panel-license .license-add-form .license-field-grow {
+      flex: 1 1 140px;
+      min-width: 140px;
+    }
+    #panel-license .license-add-form .license-field-grow-wide {
+      flex: 2 1 220px;
+      min-width: 200px;
+    }
+    #panel-license .license-field-label {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--muted);
+      flex: 1;
+      min-width: 0;
+    }
+    #panel-license .license-field-input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(0, 0, 0, 0.25);
+      color: var(--text);
+      font: inherit;
+      box-sizing: border-box;
+    }
+    #panel-license .license-field-input.license-input-narrow {
+      width: 100%;
+      max-width: 88px;
+    }
+    #panel-license .license-field-input.license-input-count {
+      max-width: 72px;
+    }
+    #panel-license .license-gen-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: flex-end;
+      margin-top: 4px;
+    }
+    #panel-license .license-gen-actions .license-field-label {
+      flex: 0 1 auto;
+    }
+    #panel-license .license-gen-actions .license-field-label.license-gen-note-wrap {
+      flex: 2 1 220px;
+      min-width: 180px;
+    }
+    #panel-license .license-keys-panel {
+      margin-top: 22px;
+    }
+    #panel-license .license-keys-panel-head {
+      margin-bottom: 10px;
+    }
+    #panel-license .license-keys-panel-head .external-exe-title {
+      margin: 0;
+    }
+    #panel-license .license-keys-panel-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px 18px;
+      align-items: flex-end;
+      margin-bottom: 16px;
+    }
+    #panel-license .license-keys-filter-field {
+      flex: 1 1 180px;
+      min-width: min(100%, 200px);
+      max-width: 320px;
+      margin: 0;
+    }
+    #panel-license .license-keys-groups {
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+    #panel-license .license-keys-product-block {
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      background: rgba(255, 255, 255, 0.03);
+      padding: 14px 16px 16px;
+    }
+    html[data-theme='light'] #panel-license .license-keys-product-block {
+      border-color: rgba(15, 23, 36, 0.1);
+      background: rgba(255, 255, 255, 0.45);
+    }
+    #panel-license .license-keys-product-head {
+      margin-bottom: 12px;
+    }
+    #panel-license .license-keys-product-title {
+      margin: 0 0 4px;
+      font-family: Syne, Inter, system-ui, sans-serif;
+      font-size: 1.05rem;
+      font-weight: 750;
+      letter-spacing: -0.025em;
+      color: var(--text);
+    }
+    #panel-license .license-keys-product-meta {
+      margin: 0;
+      font-size: 0.78rem;
+      color: rgba(226, 229, 246, 0.55);
+      line-height: 1.45;
+    }
+    html[data-theme='light'] #panel-license .license-keys-product-meta {
+      color: rgba(55, 59, 72, 0.72);
+    }
+    #panel-license .license-keys-empty {
+      margin: 0;
+      color: var(--muted);
+    }
+    #panel-license .license-keys-product-block .disk-table-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    #panel-license .license-keys-product-block .pc-disk-table th:nth-child(3),
+    #panel-license .license-keys-product-block .pc-disk-table td:nth-child(3) {
+      min-width: 140px;
+      max-width: min(420px, 44vw);
+      vertical-align: top;
+    }
+    #panel-license .license-keys-product-block .pc-disk-table th:last-child,
+    #panel-license .license-keys-product-block .pc-disk-table td:last-child {
+      min-width: 240px;
+      text-align: right;
+    }
+    #panel-license .license-reset-hwid-muted {
+      opacity: 0.48;
+    }
+    #panel-license .license-row-hwid-value {
+      font-family: JetBrains Mono, ui-monospace, monospace;
+      font-size: 0.74rem;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      display: inline-block;
+      max-width: min(400px, 92vw);
+      line-height: 1.4;
+      vertical-align: top;
+    }
+    #panel-license .license-row-hwid-none {
+      color: var(--muted);
+      opacity: 0.72;
+      font-size: 0.82rem;
+      font-style: italic;
+    }
+
+    details.external-exe-details {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    details.external-exe-details > summary {
+      cursor: pointer;
+      list-style: none;
+      color: rgba(226,229,246,0.8);
+      font-size: 0.9rem;
+      font-weight: 650;
+      letter-spacing: -0.02em;
+    }
+    details.external-exe-details > summary::-webkit-details-marker {
+      display: none;
+    }
+    details.external-exe-details .external-exe-summary-eyebrow {
+      display: inline-block;
+      margin-left: 8px;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.48rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(238,240,248,0.52);
+      vertical-align: middle;
+    }
+    .external-exe-details-body {
+      margin-top: 14px;
+    }
+    .threat-mount .pc-tier-warn td:first-child {
+      box-shadow: inset 4px 0 0 rgba(255,138,154,0.85);
+    }
+    .threat-mount .pc-tier-hint td:first-child {
+      box-shadow: inset 4px 0 0 rgba(124,108,240,0.75);
+    }
+    .threat-mount .pc-tier-notice td:first-child {
+      box-shadow: inset 4px 0 0 rgba(160,206,250,0.55);
+    }
+    .external-exe-title {
+      font-family: Syne, Inter, system-ui, sans-serif;
+      font-size: 1.02rem;
+      font-weight: 800;
+      margin: 0 0 8px;
+      letter-spacing: -0.02em;
+    }
+    .exe-console {
+      margin: 12px 0 0;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(0, 0, 0, 0.35);
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 0.7825rem;
+      line-height: 1.5;
+      color: rgba(240,244,255,0.9);
+      white-space: pre-wrap;
+      overflow-x: auto;
+      word-break: break-word;
+      min-height: 2.75rem;
+      max-height: min(420px, 55vh);
+      overflow-y: auto;
+    }
+    .exe-console.muted-console {
+      color: rgba(232,237,247,0.45);
+      font-style: italic;
+      min-height: auto;
+      max-height: none;
+    }
+    .external-serial-paste {
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: 4px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0, 0, 0, 0.28);
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 0.7825rem;
+      line-height: 1.5;
+      color: rgba(240,244,255,0.92);
+      min-height: 5.5rem;
+      resize: vertical;
+    }
+    .external-serial-paste:focus {
+      outline: 2px solid rgba(124, 108, 240, 0.45);
+      outline-offset: 1px;
+    }
+    .serial-compare-table-wrap {
+      margin-top: 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.08);
+      overflow: hidden;
+    }
+    table.serial-compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+    .serial-compare-table th {
+      text-align: left;
+      padding: 8px 10px;
+      background: rgba(0, 0, 0, 0.35);
+      color: rgba(226,229,246,0.9);
+      font-weight: 650;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .serial-compare-table td {
+      padding: 8px 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      vertical-align: top;
+      word-break: break-word;
+    }
+    .serial-compare-table tr:last-child td {
+      border-bottom: none;
+    }
+    .serial-compare-hit td:last-child {
+      color: rgba(164, 230, 180, 0.95);
+      font-weight: 600;
+    }
+    .serial-compare-miss td:last-child {
+      color: rgba(255, 196, 120, 0.88);
+    }
+    .serial-compare-skip td {
+      color: rgba(180,184,205,0.55);
+      font-size: 0.78rem;
+    }
+
+    @media (max-width: 560px) {
+      .pc-dl {
+        grid-template-columns: 1fr;
+      }
+      .pc-dl dd {
+        margin-bottom: 8px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .serial-btn-primary:hover:not(:disabled) { transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="galaxy-stage" aria-hidden="true">
+    <div class="galaxy-band"></div>
+    <div class="galaxy-blob galaxy-blob--a"></div>
+    <div class="galaxy-blob galaxy-blob--b"></div>
+    <div class="galaxy-blob galaxy-blob--c"></div>
+    <div class="galaxy-stars"></div>
+    <div class="galaxy-stars-twinkle"></div>
+    <div class="galaxy-dust"></div>
+    <div class="galaxy-vignette"></div>
+  </div>
+  <div class="layout">
+    <div class="rail-container" id="rail-container">
+      <button type="button" class="rail-toggle" id="rail-toggle" aria-expanded="true" aria-controls="rail-panel" title="Collapse sidebar">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+      </button>
+      <aside class="rail" id="rail-panel">
+      <div class="brand-lockup">
+        <div class="brand-logo-wrap">
+          <img
+            class="brand-logo"
+            src="/assets/galaxy-products-logo.png"
+            width="52"
+            height="52"
+            decoding="async"
+            alt=""
+          />
+        </div>
+        <h1 class="brand"><span class="brand-gradient">Galaxy Products</span></h1>
+      </div>
+      <p class="tagline">Local tools running on your machine — pick an app.</p>
+      <nav aria-label="Products">
+        <button id="tab-home" type="button" role="tab" aria-selected="true" aria-controls="panel-home">Home</button>
+        <button id="tab-steam" type="button" role="tab" aria-selected="false" aria-controls="panel-steam">SteamWebHourChecker</button>
+        <button id="tab-game-updates" type="button" role="tab" aria-selected="false" aria-controls="panel-game-updates">Game updates</button>
+        <button id="tab-serial" type="button" role="tab" aria-selected="false" aria-controls="panel-serial">PC serial checker</button>
+        <button id="tab-startup" type="button" role="tab" aria-selected="false" aria-controls="panel-startup">Startup apps</button>
+        <button id="tab-security" type="button" role="tab" aria-selected="false" aria-controls="panel-security">Security hints</button>
+        <button id="tab-license" type="button" role="tab" aria-selected="false" aria-controls="panel-license">Products &amp; keys</button>
+      </nav>
+      <div class="rail-footer">
+      <details class="rail-settings" id="rail-settings">
+        <summary class="rail-settings-summary">
+          Settings
+          <svg class="rail-settings-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </summary>
+        <div class="rail-settings-body">
+          <div class="setting-block">
+            <h4>Theme</h4>
+            <p class="setting-block-hint">Switch the look. Saved across sessions.</p>
+            <div class="theme-toggle" role="radiogroup" aria-label="Color mode">
+              <button type="button" class="theme-mode" data-mode="dark" aria-pressed="true">Dark</button>
+              <button type="button" class="theme-mode" data-mode="light" aria-pressed="false">Light</button>
+            </div>
+          </div>
+          <div class="setting-block">
+            <h4>Accent</h4>
+            <p class="setting-block-hint">Pick a vibe.</p>
+            <div class="accent-grid">
+              <button type="button" class="accent-swatch" data-accent="blue" aria-label="Blue accent" aria-pressed="true" style="--c1:#66c0f4;--c2:#1b74b3"></button>
+              <button type="button" class="accent-swatch" data-accent="purple" aria-label="Purple accent" aria-pressed="false" style="--c1:#b481ff;--c2:#6b3ec0"></button>
+              <button type="button" class="accent-swatch" data-accent="green" aria-label="Green accent" aria-pressed="false" style="--c1:#5ee27a;--c2:#23823a"></button>
+              <button type="button" class="accent-swatch" data-accent="orange" aria-label="Orange accent" aria-pressed="false" style="--c1:#ff944d;--c2:#c25a18"></button>
+              <button type="button" class="accent-swatch" data-accent="pink" aria-label="Pink accent" aria-pressed="false" style="--c1:#ff7ab8;--c2:#b8407a"></button>
+              <button type="button" class="accent-swatch" data-accent="cyan" aria-label="Cyan accent" aria-pressed="false" style="--c1:#5ee0e0;--c2:#1f9595"></button>
+            </div>
+          </div>
+          <p class="setting-footnote">Same choices as SteamWeb Hour Checker — synced automatically.</p>
+        </div>
+      </details>
+      <details class="rail-changelog" id="rail-changelog">
+        <summary class="rail-changelog-summary">
+          Changelog
+          <svg class="rail-settings-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </summary>
+        <div class="rail-changelog-body">
+          <p class="rail-meta-version" id="rail-meta-version">Open to load version…</p>
+          <pre class="changelog-pre" id="changelog-pre" aria-live="polite"></pre>
+        </div>
+      </details>
+      <div class="muted-code">
+        Open this hub at <code id="hint-url"></code>
+      </div>
+      <div class="made-by">
+        <img src="/assets/ghostruhh-pfp.png" alt="Ghostruhh avatar" width="48" height="48" decoding="async" />
+        <div class="credit-lines">
+          <span class="credit-tag">Made by</span>
+          <span class="credit-name">Ghostruhh</span>
+        </div>
+      </div>
+      </div>
+      </aside>
+    </div>
+    <main class="main-area">
+      <div class="panel-shell">
+        <section id="panel-home" role="tabpanel" aria-labelledby="tab-home">
+          <div class="welcome-layout">
+            <div class="welcome welcome-main">
+            <div class="welcome-chip">Orbital toolkit</div>
+            <h2>Welcome aboard</h2>
+            <p>Select an app: <strong style="color:var(--text);font-weight:600">SteamWebHourChecker</strong>, <strong style="color:var(--text);font-weight:600">Game updates</strong> (Steam patch radar — no profile lookup), <strong style="color:var(--text);font-weight:600">PC serial checker</strong>, <strong style="color:var(--text);font-weight:600">Startup apps</strong> (WMI list), <strong style="color:var(--text);font-weight:600">Security hints</strong>, or <strong style="color:var(--text);font-weight:600">Products &amp; keys</strong> (local catalog + key generator). The serial and startup tabs read from the Node server on <em>this</em> machine.</p>
+            <p>Links that pointed at this server with <code>?q=</code> still work — they redirect into the checker automatically.</p>
+
+            <div class="welcome-startup-viewer external-exe-block" style="margin-top:22px;padding-top:18px;text-align:left">
+              <h3 class="welcome-viewer-title">Startup report viewer</h3>
+              <p class="serial-lead" style="margin-bottom:12px">
+                On the <strong style="font-weight:700;color:var(--text)">Startup apps</strong> tab use <strong style="font-weight:700;color:var(--text)">Download report file</strong> (JSON includes a plaintext <code style="font-family:JetBrains Mono,monospace;font-size:0.82em">report_log</code>). Paste that file’s contents here to review startups without switching tabs — works fully in the browser (no live WMI call).
+              </p>
+              <textarea
+                id="home-startup-paste"
+                class="external-serial-paste"
+                spellcheck="false"
+                rows="7"
+                aria-label="Paste startup report JSON"
+                placeholder="Paste full galaxy-startup-report … .json contents (or Copy JSON from Startup apps)…"
+              ></textarea>
+              <div class="serial-actions" style="margin-top:10px">
+                <button type="button" class="serial-btn-primary" id="home-startup-parse-btn">Parse &amp; show startups</button>
+                <button type="button" class="serial-btn-ghost" id="home-startup-clear-btn">Clear</button>
+              </div>
+              <p id="home-startup-parse-status" class="serial-lead" style="margin-top:10px"></p>
+              <details id="home-startup-log-details" class="plain-serial-details" hidden style="margin-top:12px">
+                <summary style="cursor:pointer;color:rgba(226,229,246,0.75);font-size:0.9rem;font-weight:650">Embedded report log</summary>
+                <pre id="home-startup-log-pre" class="exe-console muted-console" style="margin-top:10px;white-space:pre-wrap"></pre>
+              </details>
+              <div id="home-startup-mount" class="startup-mount" style="margin-top:12px" aria-live="polite"></div>
+            </div>
+
+            <div class="welcome-credit">
+              <img src="/assets/ghostruhh-pfp.png" alt="" width="56" height="56" decoding="async" />
+              <div class="credit-lines">
+                <span class="credit-tag">Made by</span>
+                <span class="credit-name">Ghostruhh</span>
+              </div>
+            </div>
+            </div>
+
+            <aside class="welcome-hero-art">
+              <div class="welcome-hero-frame">
+                <div class="welcome-hero-crop">
+                  <img
+                    class="welcome-hero-img"
+                    src="/assets/home-hero.png"
+                    width="720"
+                    height="960"
+                    decoding="async"
+                    alt="Dog in the backyard with a soccer ball"
+                  />
+                </div>
+              </div>
+            </aside>
+          </div>
+        </section>
+        <section id="panel-serial" role="tabpanel" aria-labelledby="tab-serial" aria-hidden="true" hidden>
+          <div class="serial-sheet">
+            <h2>PC serial checker</h2>
+            <p class="serial-lead">
+              Click <strong style="font-weight:700;color:var(--text)">Scan this PC</strong> to pull SMBIOS/WMI identifiers from the Windows machine running <span class="mono" style="font-family:JetBrains Mono, monospace">server.js</span> — same layers most hardware tools read.
+              Open the hub via <strong style="font-weight:700;color:var(--text)">localhost</strong> or <strong style="font-weight:700;color:var(--text)">127.0.0.1</strong>; this API is blocked for other computers on your LAN.
+            </p>
+            <p class="serial-banner">
+              <strong>Important:</strong> Nothing here “activates” Windows or games. VMs and some OEM BIOSes show generic serials (“To be filled by O.E.M.”). Run with Node on bare metal when you care about motherboard/disk dumps.
+            </p>
+            <div class="serial-actions">
+              <button type="button" class="serial-btn-primary" id="pc-scan-btn">Scan this PC</button>
+              <button type="button" class="serial-btn-ghost" id="pc-copy-btn" disabled>Copy JSON</button>
+              <button type="button" class="serial-btn-ghost" id="pc-copy-plain-btn" disabled>Copy plaintext report</button>
+            </div>
+            <p id="pc-scan-status" class="serial-lead" style="margin-top:4px;"></p>
+            <div id="pc-scan-mount" class="pc-scan-mount pc-grid-mount" aria-live="polite"></div>
+            <details class="plain-serial-details" style="margin-top:12px">
+              <summary
+                style="cursor:pointer;color:rgba(226,229,246,0.75);font-size:0.9rem;font-weight:650;list-style-position:outside"
+              >
+                Plaintext hardware report
+              </summary>
+              <pre id="pc-serial-dump-plain" class="exe-console muted-console" style="margin-top:10px" aria-live="polite">Run Scan this PC.</pre>
+            </details>
+
+            <details id="external-exe-details" class="external-exe-details">
+              <summary>
+                External <code style="font-family:JetBrains Mono,monospace;font-size:0.86em;">.exe</code> checker
+                <span class="external-exe-summary-eyebrow">Optional</span>
+              </summary>
+              <div class="external-exe-details-body">
+                <p id="external-exe-hint" class="serial-lead" style="margin:0 0 12px"></p>
+                <label class="serial-exe-opt" style="display:flex;align-items:flex-start;gap:8px;margin:0 0 12px;font-size:0.86rem;line-height:1.5;color:rgba(226,229,246,0.9);cursor:pointer;user-select:none">
+                  <input type="checkbox" id="external-exe-capture" style="margin-top:4px;flex-shrink:0;cursor:pointer" />
+                  <span>Wait for exit and capture stdout/stderr (CLI tools — hub blocks until the process finishes or times out)</span>
+                </label>
+                <div class="serial-actions">
+                  <button type="button" class="serial-btn-ghost" id="external-exe-run" disabled title="Configure SERIAL_CHECKER_EXE in .env">Run bundled .exe</button>
+                </div>
+                <pre id="external-exe-out" class="exe-console muted-console" aria-live="polite">
+Output from your tool prints here.</pre>
+                <p class="serial-lead" style="margin:14px 0 6px;font-size:0.845rem;line-height:1.55;color:rgba(226,229,246,0.88)">
+                  <strong style="font-weight:700;color:var(--text)">Compare vs hub WMI</strong> — run <strong style="font-weight:700;color:var(--text)">Scan this PC</strong> first, then paste any report text exported or copied from the external checker below. Rows use the hub’s readings; we substring-match inside your paste (and last capture-mode console output fills the box when empty).
+                </p>
+                <textarea
+                  id="external-serial-paste"
+                  class="external-serial-paste"
+                  aria-label="External checker text to compare against hub WMI snapshot"
+                  placeholder="Paste serial report text from the external checker…"
+                  spellcheck="false"
+                  rows="5"
+                ></textarea>
+                <div class="serial-actions" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px">
+                  <button type="button" class="serial-btn-ghost" id="external-serial-compare-btn" disabled title="Needs a completed PC scan first">
+                    Compare with hub scan
+                  </button>
+                </div>
+                <div id="external-serial-compare-mount" style="margin-top:4px" aria-live="polite"></div>
+              </div>
+            </details>
+          </div>
+        </section>
+        <section id="panel-startup" role="tabpanel" aria-labelledby="tab-startup" aria-hidden="true" hidden>
+          <div class="serial-sheet">
+            <h2>Startup apps</h2>
+            <p class="serial-lead">
+              Programs registered to start with Windows on <strong style="font-weight:700;color:var(--text)">this PC</strong>, via WMI
+              <code style="font-family:JetBrains Mono,monospace;font-size:0.82em">Win32_StartupCommand</code> (registry Run keys, RunOnce where listed, and Startup folder shortcuts).
+              The list loads automatically when you open this tab; the API only responds when the hub is opened on <strong style="font-weight:700;color:var(--text)">localhost</strong> or <strong style="font-weight:700;color:var(--text)">127.0.0.1</strong> (same as the footer URL).
+              Use <strong style="font-weight:700;color:var(--text)">Download report file</strong> to save JSON + embedded log for the Home paste viewer.
+            </p>
+            <p class="serial-banner" style="margin-bottom:14px;font-size:0.815rem;line-height:1.55;color:rgba(246,246,251,0.88)">
+              <strong>Read-only.</strong> Disabling entries is done in <strong style="font-weight:700;color:var(--text)">Task Manager → Startup apps</strong>, the legacy <code>shell:startup</code> folder, or Registry — not from this hub.
+            </p>
+            <div class="serial-actions">
+              <button type="button" class="serial-btn-primary" id="startup-scan-btn">Refresh list</button>
+              <button type="button" class="serial-btn-ghost" id="startup-copy-btn" disabled>Copy JSON</button>
+              <button type="button" class="serial-btn-ghost" id="startup-download-btn" disabled title="Save report JSON (includes report_log)">Download report file</button>
+            </div>
+            <div class="url-check-form" style="margin:0 0 14px">
+              <input
+                id="startup-filter-input"
+                type="search"
+                spellcheck="false"
+                autocomplete="off"
+                placeholder="Filter by name, command, location, user…"
+                aria-label="Filter startup entries"
+              />
+            </div>
+            <p id="startup-scan-status" class="serial-lead" style="margin-top:0"></p>
+            <div id="startup-mount" class="startup-mount" aria-live="polite"></div>
+          </div>
+        </section>
+        <section id="panel-security" role="tabpanel" aria-labelledby="tab-security" aria-hidden="true" hidden>
+          <div class="serial-sheet">
+            <h2>RAT, malware &amp; cheat hints</h2>
+            <p class="serial-lead">
+              Localhost-only heuristics on <strong style="font-weight:700;color:var(--text)">this PC</strong>: running process name/path rules, Microsoft Defender WMI status, and a startup sample. Open the hub on
+              <strong style="font-weight:700;color:var(--text)">127.0.0.1</strong> / <strong style="font-weight:700;color:var(--text)">localhost</strong>.
+            </p>
+            <p class="serial-banner" style="margin-bottom:14px;font-size:0.815rem;line-height:1.55;color:rgba(246,246,251,0.88)">
+              <strong>Your machine only.</strong> Many clean PCs flag remote-access or debugging tools. This is <strong style="font-weight:700;color:var(--text)">not</strong> a replacement for antivirus or a professional IR review.
+            </p>
+            <div class="external-exe-block url-check-block" id="url-check-block">
+              <h3 class="external-exe-title">Suspicious link checker</h3>
+              <p class="serial-lead" style="margin-bottom:12px">
+                Paste a link you are unsure about. The hub (on <strong style="font-weight:700;color:var(--text)">localhost</strong> only) runs quick <strong style="font-weight:700;color:var(--text)">heuristics</strong> and tries a timed <code>HEAD</code> request to trace redirects — it does <strong style="font-weight:700;color:var(--text)">not</strong> scan for malware inside files or use a reputation blocklist.
+              </p>
+              <form id="url-check-form" class="url-check-form">
+                <input id="url-check-input" type="text" spellcheck="false" autocomplete="off" placeholder="https://example.com/page or example.com" />
+                <button type="submit" class="serial-btn-primary" id="url-check-submit">Analyze link</button>
+              </form>
+              <p id="url-check-status" class="serial-lead" style="margin-top:10px;"></p>
+              <div id="url-check-mount" aria-live="polite"></div>
+            </div>
+            <div class="serial-actions">
+              <button type="button" class="serial-btn-primary" id="threat-hints-btn">Run hint scan</button>
+              <button type="button" class="serial-btn-ghost" id="threat-copy-btn" disabled>Copy hints JSON</button>
+              <button type="button" class="serial-btn-ghost" id="defender-scan-btn">Defender quick scan (slow)</button>
+            </div>
+            <p id="threat-scan-status" class="serial-lead" style="margin-top:6px;"></p>
+            <div id="threat-mount" class="pc-scan-mount threat-mount pc-grid-mount" aria-live="polite"></div>
+            <p class="serial-lead" style="margin:12px 0 6px;font-size:0.8rem;color:var(--muted)">
+              <code>MpCmdRun.exe -Scan -ScanType 1</code> output (Windows Defender):
+            </p>
+            <pre id="defender-scan-out" class="exe-console muted-console" aria-live="polite">Run a Defender quick scan to see output.</pre>
+          </div>
+        </section>
+        <section id="panel-license" role="tabpanel" aria-labelledby="tab-license" aria-hidden="true" hidden>
+          <div class="serial-sheet">
+            <h2>Products &amp; keys</h2>
+            <p class="serial-lead">
+              Create products and mint <strong style="font-weight:700;color:var(--text)">GP-style</strong> keys. Everything lives in
+              <code style="font-family:JetBrains Mono,monospace;font-size:0.82em">data/license-store.json</code>.
+              Keep this dashboard on <strong style="font-weight:700;color:var(--text)">this PC only</strong> while the hub is running (<strong style="font-weight:700;color:var(--text)">localhost</strong>).
+              <strong>Buyers:</strong> give them <a href="/loader/" style="color:var(--accent);font-weight:600">/loader/</a> — they paste the key once, tie it to that computer, then grab the installer if you’ve wired one up.
+            </p>
+            <p class="serial-banner" style="margin-bottom:14px;font-size:0.815rem;line-height:1.55;color:rgba(246,246,251,0.88)">
+              <strong>Heads‑up:</strong> keys aren’t Stripe or encryption — treat <code style="font-family:JetBrains Mono,monospace;font-size:0.86em">data/</code>
+              like a spreadsheet you must back up yourself.
+            </p>
+            <p class="serial-lead" style="margin-top:-6px;margin-bottom:14px;font-size:0.84rem">
+              <strong>One computer per key</strong> after the first activation. Buyers can’t casually move the license to endless PCs unless you reset that key row.
+              <strong>Time‑limited keys</strong> only stop working inside your installer if your installer periodically checks back with your hub — the file sitting in Downloads alone can’t magically switch off.
+            </p>
+            <div class="serial-actions license-hub-top-actions">
+              <button type="button" class="serial-btn-primary" id="license-refresh-btn">Reload data</button>
+            </div>
+            <p id="license-status" class="serial-lead" style="margin-top:4px;margin-bottom:0"></p>
+
+            <div class="license-hub-grid">
+              <div class="license-card">
+                <h3 class="external-exe-title">Products</h3>
+                <p class="license-card-lead">Create catalog entries here — each product gets its own issued-keys section below.</p>
+                <div class="license-add-form">
+                  <label class="license-field-label license-field-grow">
+                    Name
+                    <input
+                      id="license-product-name"
+                      class="license-field-input"
+                      type="text"
+                      placeholder="e.g. Rust external"
+                      maxlength="120"
+                      autocomplete="off"
+                    />
+                  </label>
+                  <label class="license-field-label license-field-grow-wide">
+                    Description <span style="opacity:0.65;font-weight:400">(optional)</span>
+                    <input
+                      id="license-product-desc"
+                      class="license-field-input"
+                      type="text"
+                      placeholder="Short note for yourself"
+                      maxlength="500"
+                      autocomplete="off"
+                    />
+                  </label>
+                  <button type="button" class="serial-btn-primary" id="license-product-add-btn">Add product</button>
+                </div>
+                <div id="license-products-mount" aria-live="polite"></div>
+              </div>
+
+              <div class="license-card">
+                <h3 class="external-exe-title">Generate keys</h3>
+                <p class="license-card-lead">Pick a product, optional duration and batch note, then generate.</p>
+                <div class="license-gen-actions">
+                  <label class="license-field-label">
+                    Product
+                    <select id="license-gen-product" class="license-field-input" style="min-width:200px;width:auto"></select>
+                  </label>
+                  <label class="license-field-label">
+                    Count
+                    <input
+                      id="license-gen-count"
+                      class="license-field-input license-input-count"
+                      type="number"
+                      min="1"
+                      max="50"
+                      value="1"
+                    />
+                  </label>
+                  <label
+                    class="license-field-label"
+                    title="Whole days until expiry from generation time; leave empty for no expiry"
+                  >
+                    Duration <span style="opacity:0.65;font-weight:400">(days)</span>
+                    <input
+                      id="license-gen-duration"
+                      class="license-field-input license-input-narrow"
+                      type="text"
+                      inputmode="numeric"
+                      maxlength="6"
+                      placeholder="optional"
+                      autocomplete="off"
+                    />
+                  </label>
+                  <label class="license-field-label license-gen-note-wrap">
+                    Batch note <span style="opacity:0.65;font-weight:400">(optional)</span>
+                    <input
+                      id="license-gen-note"
+                      class="license-field-input"
+                      type="text"
+                      maxlength="200"
+                      placeholder="e.g. Discord giveaway"
+                      autocomplete="off"
+                    />
+                  </label>
+                  <button type="button" class="serial-btn-primary" id="license-gen-btn">Generate</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="license-card license-keys-panel">
+              <div class="license-keys-panel-head">
+                <h3 class="external-exe-title">Issued keys</h3>
+              </div>
+              <div class="license-keys-panel-filters">
+                <label class="license-field-label license-keys-filter-field">
+                  Product
+                  <select id="license-keys-filter-product" class="license-field-input" style="width:100%">
+                    <option value="">All products</option>
+                  </select>
+                </label>
+                <label class="license-field-label license-keys-filter-field">
+                  Key plan
+                  <select id="license-keys-filter-plan" class="license-field-input" style="width:100%">
+                    <option value="">All plans</option>
+                    <option value="lifetime">Lifetime (no expiry)</option>
+                    <option value="day">Day (1d)</option>
+                    <option value="week">Week (6–8d)</option>
+                    <option value="month">Month (28–31d)</option>
+                    <option value="other">Other timed</option>
+                  </select>
+                </label>
+                <label class="license-field-label license-keys-filter-field">
+                  Sort groups
+                  <select id="license-keys-sort" class="license-field-input" style="width:100%">
+                    <option value="created_desc">Newest activity first</option>
+                    <option value="created_asc">Oldest activity first</option>
+                    <option value="product_asc">Product name A–Z</option>
+                    <option value="product_desc">Product name Z–A</option>
+                  </select>
+                </label>
+              </div>
+              <div id="license-keys-mount" aria-live="polite"></div>
+            </div>
+          </div>
+        </section>
+        <section id="panel-steam" role="tabpanel" aria-labelledby="tab-steam" aria-hidden="true" hidden>
+          <div class="iframe-panel">
+            <iframe id="steam-frame" title="SteamWebHour Checker" referrerpolicy="no-referrer"></iframe>
+          </div>
+        </section>
+        <section id="panel-game-updates" role="tabpanel" aria-labelledby="tab-game-updates" aria-hidden="true" hidden>
+          <div class="iframe-panel">
+            <iframe id="game-updates-frame" title="Game updates — Steam patch radar" referrerpolicy="no-referrer"></iframe>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const tabHome = document.getElementById('tab-home');
+    const tabSteam = document.getElementById('tab-steam');
+    const tabGameUpdates = document.getElementById('tab-game-updates');
+    const tabSerial = document.getElementById('tab-serial');
+    const tabStartup = document.getElementById('tab-startup');
+    const tabSecurity = document.getElementById('tab-security');
+    const tabLicense = document.getElementById('tab-license');
+    const panelHome = document.getElementById('panel-home');
+    const panelSteam = document.getElementById('panel-steam');
+    const panelGameUpdates = document.getElementById('panel-game-updates');
+    const panelSerial = document.getElementById('panel-serial');
+    const panelStartup = document.getElementById('panel-startup');
+    const panelSecurity = document.getElementById('panel-security');
+    const panelLicense = document.getElementById('panel-license');
+    const iframe = document.getElementById('steam-frame');
+    const gameUpdatesFrame = document.getElementById('game-updates-frame');
+    const railPanel = document.getElementById('rail-panel');
+
+    const STEAM_FRAME_SRC = '/steam-web-hour-checker/';
+    const GAME_UPDATES_FRAME_SRC = '/game-updates/';
+    const STEAM_THEME_MSG = 'steamscope-sync-theme';
+    const SITE_THEME_LS = 'steamscope.theme';
+    const SITE_ACCENT_LS = 'steamscope.accent';
+
+    gameUpdatesFrame?.addEventListener('load', () => {
+      try {
+        gameUpdatesFrame?.contentWindow?.postMessage(
+          {
+            type: STEAM_THEME_MSG,
+            theme: document.documentElement.dataset.theme || 'dark',
+            accent: document.documentElement.dataset.accent || 'blue',
+          },
+          location.origin,
+        );
+      } catch (_) {
+        /* ignore */
+      }
+    });
+
+    function syncSteamIframeTheme(mode, accent) {
+      const msg = { type: STEAM_THEME_MSG, theme: mode, accent: accent };
+      try {
+        iframe?.contentWindow?.postMessage(msg, location.origin);
+      } catch (_) {
+        /* ignore */
+      }
+      try {
+        gameUpdatesFrame?.contentWindow?.postMessage(msg, location.origin);
+      } catch (_) {
+        /* ignore */
+      }
+    }
+
+    /** @param {{ skipStorage?: boolean; fromChild?: boolean }} [opts] */
+    function applySiteTheme(mode, accent, opts) {
+      const o = opts || {};
+      const m = mode || 'dark';
+      const a = accent || 'blue';
+      document.documentElement.dataset.theme = m;
+      document.documentElement.dataset.accent = a;
+      if (!o.skipStorage && !o.fromChild) {
+        try {
+          localStorage.setItem(SITE_THEME_LS, m);
+          localStorage.setItem(SITE_ACCENT_LS, a);
+        } catch (_) {
+          /* ignore */
+        }
+      }
+      if (!o.fromChild) syncSteamIframeTheme(m, a);
+      document.querySelectorAll('#rail-settings .theme-mode').forEach((b) => {
+        b.setAttribute('aria-pressed', String(b.dataset.mode === m));
+      });
+      document.querySelectorAll('#rail-settings .accent-swatch').forEach((b) => {
+        b.setAttribute('aria-pressed', String(b.dataset.accent === a));
+      });
+    }
+
+    function initSiteAppearance() {
+      let m = 'dark';
+      let a = 'blue';
+      try {
+        m = localStorage.getItem(SITE_THEME_LS) || 'dark';
+        a = localStorage.getItem(SITE_ACCENT_LS) || 'blue';
+      } catch (_) {
+        /* ignore */
+      }
+      applySiteTheme(m, a, { skipStorage: true, fromChild: true });
+    }
+
+    window.addEventListener('message', (e) => {
+      if (e.origin !== location.origin) return;
+      const d = e.data;
+      if (!d || d.type !== STEAM_THEME_MSG) return;
+      const theme = typeof d.theme === 'string' ? d.theme : null;
+      const accent = typeof d.accent === 'string' ? d.accent : null;
+      if (!theme && !accent) return;
+      const m = theme || document.documentElement.dataset.theme || 'dark';
+      const a = accent || document.documentElement.dataset.accent || 'blue';
+      applySiteTheme(m, a, { skipStorage: true, fromChild: true });
+    });
+
+    railPanel?.addEventListener('click', (e) => {
+      const tm = e.target.closest('#rail-settings .theme-mode');
+      const sw = e.target.closest('#rail-settings .accent-swatch');
+      if (tm?.dataset.mode) {
+        applySiteTheme(tm.dataset.mode, document.documentElement.dataset.accent || 'blue');
+        return;
+      }
+      if (sw?.dataset.accent) {
+        applySiteTheme(document.documentElement.dataset.theme || 'dark', sw.dataset.accent);
+      }
+    });
+
+    function escPc(s) {
+      return String(s ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    /** Pull first JSON object from paste (handles extra text around). */
+    function extractFirstJsonObject(text) {
+      const t = String(text ?? '').replace(/^\uFEFF/, '').trim();
+      if (!t) return null;
+      try {
+        return JSON.parse(t);
+      } catch {
+        /* continue */
+      }
+      const start = t.indexOf('{');
+      if (start === -1) return null;
+      let depth = 0;
+      let inStr = false;
+      let esc = false;
+      for (let p = start; p < t.length; p++) {
+        const ch = t[p];
+        if (esc) {
+          esc = false;
+          continue;
+        }
+        if (ch === '\\' && inStr) {
+          esc = true;
+          continue;
+        }
+        if (ch === '"') {
+          inStr = !inStr;
+          continue;
+        }
+        if (inStr) continue;
+        if (ch === '{') depth++;
+        else if (ch === '}') {
+          depth--;
+          if (depth === 0) {
+            try {
+              return JSON.parse(t.slice(start, p + 1));
+            } catch {
+              return null;
+            }
+          }
+        }
+      }
+      return null;
+    }
+
+    function pickPasteStr(row, keys) {
+      if (!row || typeof row !== 'object') return null;
+      for (const k of keys) {
+        const v = row[k];
+        if (v != null && v !== '') return String(v);
+      }
+      return null;
+    }
+
+    function coerceEntriesFromPaste(doc) {
+      let entries = doc.entries ?? doc.Entries;
+      if (typeof entries === 'string') {
+        try {
+          entries = JSON.parse(entries);
+        } catch {
+          return [];
+        }
+      }
+      if (entries == null) return [];
+      if (Array.isArray(entries)) return entries;
+      if (typeof entries === 'object') {
+        const keys = Object.keys(entries);
+        if (keys.length && keys.every((k) => /^\d+$/.test(k))) {
+          return keys.sort((a, b) => Number(a) - Number(b)).map((k) => entries[k]);
+        }
+        return [entries];
+      }
+      return [];
+    }
+
+    /** Shape pasted JSON like /api/startup-apps for renderStartupApps */
+    function normalizeHomeStartupPaste(parsed) {
+      const rows = coerceEntriesFromPaste(parsed);
+      const entries = rows.map((s) => {
+        const cmd = pickPasteStr(s, ['command', 'Command']);
+        const cmdOut =
+          typeof cmd === 'string' && cmd.length > 1200 ? `${cmd.slice(0, 1197)}…` : cmd || null;
+        return {
+          name: pickPasteStr(s, ['name', 'Name']),
+          command: cmdOut,
+          location: pickPasteStr(s, ['location', 'Location']),
+          user: pickPasteStr(s, ['user', 'User']),
+        };
+      });
+      const totalRaw = parsed.total ?? parsed.Total;
+      const total =
+        typeof totalRaw === 'number' && !Number.isNaN(totalRaw) ? totalRaw : entries.length;
+      const diag = Array.isArray(parsed.diagnostics) ? parsed.diagnostics : [];
+      return {
+        notes: typeof parsed.notes === 'string' ? parsed.notes : null,
+        error: parsed.error ? String(parsed.error) : null,
+        diagnostics: diag,
+        platform: parsed.platform != null ? String(parsed.platform) : null,
+        source: parsed.source ?? parsed.Source ?? null,
+        total,
+        truncated: Boolean(parsed.truncated ?? parsed.Truncated),
+        cap:
+          typeof parsed.cap === 'number'
+            ? parsed.cap
+            : typeof parsed.Cap === 'number'
+              ? parsed.Cap
+              : null,
+        entry_count: entries.length,
+        entries,
+        report_log: typeof parsed.report_log === 'string' ? parsed.report_log : null,
+        report_schema: parsed.report_schema != null ? String(parsed.report_schema) : null,
+      };
+    }
+
+    function isHubSerialPlaceholder(raw) {
+      const s = String(raw ?? '').trim().toLowerCase();
+      if (!s || s === '—') return true;
+      if (s.length < 2) return true;
+      const junk = ['to be filled', 'to be determined', 'o.e.m.', 'default string', 'not applicable', 'not specified'];
+      if (junk.some((j) => s.includes(j))) return true;
+      if (/^[0\-.\s]+$/.test(s)) return true;
+      return false;
+    }
+
+    function buildExternalHaystacks(toolTextRaw) {
+      const lower = String(toolTextRaw ?? '').toLowerCase();
+      const compact = lower.replace(/[^a-z0-9]/g, '');
+      return { lower, compact };
+    }
+
+    /** @param {{ lower: string, compact: string }} hay */
+    function valueMatchedInHaystacks(hay, value) {
+      const vRaw = String(value ?? '').trim();
+      if (!vRaw || vRaw === '—') return false;
+      const vLow = vRaw.toLowerCase();
+      if (hay.lower.includes(vLow)) return true;
+      const alnum = vLow.replace(/[^a-z0-9]/g, '');
+      const minFlexible = /^[a-f0-9]+$/i.test(alnum) ? 8 : 7;
+      if (alnum.length < minFlexible) return false;
+      return hay.compact.includes(alnum);
+    }
+
+    function flattenHubSerialRows(doc) {
+      /** @type {{ group: string, label: string, value: string, skip: boolean }[]} */
+      const rows = [];
+      const push = (group, label, val) => {
+        const raw = val != null ? String(val).trim() : '';
+        const skip = !raw || raw === '—' || isHubSerialPlaceholder(raw);
+        rows.push({ group, label, value: raw || '—', skip });
+      };
+
+      push('Machine', 'Serial number', doc?.machine?.serial);
+      push('Machine', 'System UUID', doc?.machine?.uuid);
+      push('Motherboard', 'Baseboard serial', doc?.motherboard?.serial);
+      push('BIOS', 'BIOS serial', doc?.bios?.serial);
+      push('Chassis', 'Chassis serial', doc?.chassis?.serial);
+      push('Windows', 'OS / install serial field', doc?.os?.serial);
+
+      const disks = Array.isArray(doc?.disks) ? doc.disks : [];
+      disks.forEach((d, i) => {
+        const tag = (d?.name || `#${i + 1}`).trim();
+        push('Disk', `${tag} · serial`, d.serial);
+        push('Disk', `${tag} · firmware`, d.firmware_revision);
+      });
+
+      const mem = Array.isArray(doc?.memory_modules) ? doc.memory_modules : [];
+      mem.forEach((m, i) => {
+        const bank = (m?.bank || `#${i + 1}`).trim();
+        push('RAM DIMM', `${bank} · module serial`, m.serial);
+        push('RAM DIMM', `${bank} · part number`, m.part_number);
+      });
+
+      const monitors = Array.isArray(doc?.monitor_edid) ? doc.monitor_edid : [];
+      monitors.forEach((mon, i) => {
+        const tag =
+          ([mon?.friendly_name, mon?.product_code_id, mon?.instance_name].find((x) => x && String(x).trim()) || `Display ${i + 1}`).trim();
+        push('Monitor (EDID)', `${tag} · serial`, mon.serial_edid);
+      });
+
+      const cpus = Array.isArray(doc?.cpu_processor_wmi) ? doc.cpu_processor_wmi : [];
+      cpus.forEach((r, i) => {
+        const sock = (r?.socket_designation || `#${i + 1}`).trim();
+        push('CPU WMI', `${sock} · ProcessorId`, r.processor_id_hex);
+      });
+
+      return rows;
+    }
+
+    /** @returns {string} */
+    function renderSerialCompareInner(doc, toolTextCombined) {
+      const toolCombined = String(toolTextCombined ?? '').trim();
+      if (!doc || typeof doc !== 'object')
+        return '<div class="pc-block"><p class="pc-err-inline">Load a hub PC scan snapshot first.</p></div>';
+
+      if (!toolCombined) {
+        return `<div class="pc-block"><p class="serial-lead" style="margin:0;color:var(--muted)">Paste report text above, or run the external checker with <strong style="font-weight:700;color:var(--text)">Wait for exit…</strong> checked so captured stdout fills the textarea when it is empty.</p></div>`;
+      }
+
+      const hay = buildExternalHaystacks(toolCombined);
+      const rows = flattenHubSerialRows(doc);
+      const actionable = rows.filter((r) => !r.skip);
+      let hits = 0;
+      /** @type {string[]} */
+      const trParts = [];
+
+      for (const r of rows) {
+        if (r.skip) {
+          trParts.push(
+            `<tr class="serial-compare-skip"><td>${escPc(r.group)}</td><td>${escPc(r.label)}</td><td>${escPc(r.value)}</td><td>Not compared (generic / empty)</td></tr>`,
+          );
+          continue;
+        }
+        const hit = valueMatchedInHaystacks(hay, r.value);
+        if (hit) hits++;
+        const cls = hit ? 'serial-compare-hit' : 'serial-compare-miss';
+        const status = hit ? 'Found word-for-word / relaxed match in paste' : 'Not found — different formatting, abbreviated, or tool omitted';
+        trParts.push(
+          `<tr class="${cls}"><td>${escPc(r.group)}</td><td>${escPc(r.label)}</td><td>${escPc(r.value)}</td><td>${escPc(status)}</td></tr>`,
+        );
+      }
+
+      const summary = `<div class="pc-block" style="margin-bottom:10px;padding:10px 12px;font-size:0.83rem;line-height:1.5;color:var(--muted)">
+<strong style="font-weight:700;color:var(--text)">${hits}</strong> of <strong style="font-weight:700;color:var(--text)">${actionable.length}</strong> actionable hub identifiers matched in your external text (${toolCombined.length} chars pasted / captured).
+Identical casing or spacing differences are tolerated for long alphanumeric IDs; bogus OEM placeholders are skipped.
+</div>`;
+
+      const table = `<div class="serial-compare-table-wrap"><table class="serial-compare-table" role="region" aria-label="Hub WMI vs external serial checker">
+        <thead><tr><th>Group</th><th>Hub field</th><th>Value (from hub WMI)</th><th>In external report?</th></tr></thead>
+        <tbody>${trParts.join('')}</tbody>
+      </table></div>`;
+
+      return `${summary}${table}`;
+    }
+
+    function formatDiskSize(bytes) {
+      if (bytes == null || typeof bytes !== 'number' || Number.isNaN(bytes)) return '—';
+      const gib = bytes / (1024 ** 3);
+      return gib >= 0.09 ? `${gib.toFixed(1)} GB` : `${Math.round(bytes / (1024 ** 2))} MB`;
+    }
+
+    /**
+     * Robust JSON parsing for localhost APIs — static middleware mis-order or proxies
+     * sometimes return HTML; surface a readable error instead of "Invalid JSON response".
+     * @param {Response} res
+     */
+    async function parseApiJsonBody(res) {
+      const raw = await res.text();
+      const ct = (res.headers.get('content-type') || '').toLowerCase();
+      if (!raw) {
+        /** @type {any} */
+        const empty = {};
+        return empty;
+      }
+      try {
+        /** @type {any} */
+        const data = JSON.parse(raw);
+        return data;
+      } catch {
+        const clip = raw.length > 360 ? `${raw.slice(0, 360)}…` : raw;
+        const flat = clip.replace(/\s+/g, ' ').trim();
+        let pathname = '';
+        try {
+          pathname = new URL(res.url).pathname;
+        } catch {
+          pathname = '(unknown path)';
+        }
+        throw new Error(
+          ct.includes('text/html')
+            ? `Server returned HTML instead of JSON for ${pathname} (HTTP ${res.status}). Fully stop Node (Ctrl+C), then restart from your steamwebbot folder (${location.origin}) so the latest server.js loads. Opening the hub via 127.0.0.1 or localhost.${flat ? `\nSnippet: ${flat}` : ''}`
+            : `Could not parse JSON (${pathname}, HTTP ${res.status}, ${ct || 'unknown type'}).\nSnippet: ${flat}`,
+        );
+      }
+    }
+
+    let lastPcSnapshot = null;
+    let lastThreatDoc = null;
+    let lastStartupDoc = null;
+    let lastExternalCapturedText = '';
+
+    function tierPcClass(t) {
+      const x = String(t || '').toLowerCase();
+      if (x === 'warning') return 'pc-tier-warn';
+      if (x === 'hint') return 'pc-tier-hint';
+      if (x === 'notice') return 'pc-tier-notice';
+      return '';
+    }
+
+    function renderThreatHints(doc) {
+      const parts = [];
+      if (!doc || typeof doc !== 'object') {
+        return '<div class="pc-block pc-grid-span-full"><p class="pc-err-inline">Invalid response.</p></div>';
+      }
+      if (doc.notes && typeof doc.notes === 'string') {
+        parts.push(`<p class="serial-lead pc-grid-span-full" style="margin:0 0 8px">${escPc(doc.notes)}</p>`);
+      }
+      if (doc.error) {
+        parts.push(`<div class="pc-diag-bar pc-grid-span-full"><strong>error</strong> · ${escPc(doc.error)}</div>`);
+      }
+      const diags = Array.isArray(doc.diagnostics) ? doc.diagnostics : [];
+      if (diags.length) {
+        parts.push(`<div class="pc-diag-bar pc-grid-span-full">${diags.map((d) => `<div><strong>${escPc(d.source)}</strong> · ${escPc(d.detail)}</div>`).join('')}</div>`);
+      }
+
+      const sum = doc.summary && typeof doc.summary === 'object' ? doc.summary : {};
+      parts.push(`
+        <div class="pc-block">
+          <h3>Summary</h3>
+          <dl class="pc-dl">
+            <dt>Warnings</dt><dd>${escPc(String(sum.warning_rows ?? '—'))}</dd>
+            <dt>Hints (game tooling)</dt><dd>${escPc(String(sum.hint_rows ?? '—'))}</dd>
+            <dt>Notices (remote / sys tools)</dt><dd>${escPc(String(sum.notice_rows ?? '—'))}</dd>
+            <dt>Defender WMI</dt><dd>${sum.defender_available ? 'available' : 'unavailable / failed'}</dd>
+            <dt>Startup rows</dt><dd>${escPc(String(sum.startup_entries ?? '—'))}</dd>
+          </dl>
+          ${doc.platform ? `<p class="serial-lead" style="margin:8px 0 0;font-size:0.82rem;color:var(--muted)">Platform · <strong style="color:var(--text)">${escPc(doc.platform)}</strong>${doc.rule_set ? ` · ${escPc(doc.rule_set)}` : ''}</p>` : ''}
+        </div>`);
+
+      const def = doc.defender;
+      if (def && typeof def === 'object' && !Array.isArray(def)) {
+        const rows = Object.keys(def).map((k) => [k, k.replace(/_/g, ' ')]);
+        parts.push(dlFromObj('Microsoft Defender status (MpComputerStatus)', def, rows));
+      } else {
+        parts.push(
+          `<div class="pc-block"><h3>Microsoft Defender status</h3><p class="serial-lead" style="margin:0;color:var(--muted)">Not retrieved (removed AV, SKU without Defender, or access denied).</p></div>`,
+        );
+      }
+
+      const hints = Array.isArray(doc.process_hints) ? [...doc.process_hints] : [];
+      hints.sort((a, b) => {
+        const o = { warning: 0, hint: 1, notice: 2 };
+        const ta = o[String(a.tier || '').toLowerCase()];
+        const tb = o[String(b.tier || '').toLowerCase()];
+        return ((ta != null ? ta : 9) - (tb != null ? tb : 9));
+      });
+
+      let hintHtml =
+        hints.length === 0
+          ? `<p class="serial-lead" style="margin:0;color:#a8eab8;font-size:0.88rem;">No heuristic process matches — that does not prove a clean PC.</p>`
+          : `<div class="disk-table-wrap"><table class="pc-disk-table">
+              <thead><tr><th>Tier</th><th>Category</th><th>PID</th><th>Process</th><th>Path</th></tr></thead>
+              <tbody>
+                ${hints
+                  .map(
+                    (h) => `
+                  <tr class="${tierPcClass(h.tier)}">
+                    <td>${escPc(h.tier || '—')}</td>
+                    <td>${escPc(h.group || '—')}</td>
+                    <td>${escPc(h.pid != null ? String(h.pid) : '—')}</td>
+                    <td>${escPc(h.name || '—')}</td>
+                    <td>${escPc(h.path || '—')}</td>
+                  </tr>`,
+                  )
+                  .join('')}
+              </tbody></table></div>`;
+      parts.push(`<div class="pc-block"><h3>Process matches (${hints.length})</h3>${hintHtml}</div>`);
+
+      const su = Array.isArray(doc.startup_sample) ? doc.startup_sample : [];
+      let stHtml =
+        su.length === 0
+          ? `<p class="pc-err-inline">No startup rows from WMI Win32_StartupCommand.</p>`
+          : `<div class="disk-table-wrap"><table class="pc-disk-table">
+              <thead><tr><th>Name</th><th>User</th><th>Registry / location</th><th>Command</th></tr></thead>
+              <tbody>
+              ${su
+                .map(
+                  (s) => `
+              <tr>
+                <td>${escPc(s.name || '—')}</td>
+                <td>${escPc(s.user || '—')}</td>
+                <td>${escPc(s.location || '—')}</td>
+                <td>${escPc(s.command || '—')}</td>
+              </tr>`,
+                )
+                .join('')}
+              </tbody></table></div>`;
+      parts.push(`<div class="pc-block"><h3>Startup catalog (sample)</h3>${stHtml}</div>`);
+
+      if (doc.defender_quick_scan_exe) {
+        parts.push(
+          `<div class="pc-grid-span-full"><p class="serial-lead" style="margin:0;font-size:0.8rem;color:var(--muted)">Detected <code>MpCmdRun.exe</code> at<br><span style="word-break:break-all">${escPc(doc.defender_quick_scan_exe)}</span></p></div>`,
+        );
+      }
+
+      return parts.join('');
+    }
+
+    /**
+     * @param {any} doc
+     * @param {string} filterLower lowercase substring filter
+     */
+    function renderStartupApps(doc, filterLower) {
+      if (!doc || typeof doc !== 'object') {
+        return '<div class="pc-block"><p class="pc-err-inline">Invalid response.</p></div>';
+      }
+      const parts = [];
+      if (doc.notes && typeof doc.notes === 'string') {
+        parts.push(`<p class="serial-lead" style="margin:0 0 10px">${escPc(doc.notes)}</p>`);
+      }
+      if (doc.error) {
+        parts.push(`<div class="pc-diag-bar"><strong>error</strong> · ${escPc(String(doc.error))}</div>`);
+      }
+      const diags = Array.isArray(doc.diagnostics) ? doc.diagnostics : [];
+      if (diags.length) {
+        parts.push(
+          `<div class="pc-diag-bar">${diags.map((d) => `<div><strong>${escPc(d.source)}</strong> · ${escPc(d.detail)}</div>`).join('')}</div>`,
+        );
+      }
+
+      const entries = Array.isArray(doc.entries) ? doc.entries : [];
+      const flt = filterLower || '';
+      const filtered = flt
+        ? entries.filter((e) => {
+            const blob = [e.name, e.command, e.location, e.user]
+              .map((x) => String(x ?? '').toLowerCase())
+              .join(' ');
+            return blob.includes(flt);
+          })
+        : entries;
+
+      /** @type {string[]} */
+      const metaBits = [];
+      if (doc.platform) metaBits.push(`Platform: ${doc.platform}`);
+      if (doc.source) metaBits.push(`Source: ${doc.source}`);
+      const total = doc.total != null && !Number.isNaN(Number(doc.total)) ? Number(doc.total) : entries.length;
+      metaBits.push(`Total on PC (WMI): ${total}`);
+      metaBits.push(`Showing: ${filtered.length} of ${entries.length} loaded`);
+      if (doc.truncated) metaBits.push(`List capped at ${doc.cap ?? '?'} rows.`);
+
+      parts.push(
+        `<div class="pc-block"><h3>Summary</h3><p class="serial-lead" style="margin:0;font-size:0.86rem;line-height:1.55">${escPc(metaBits.join(' · '))}</p></div>`,
+      );
+
+      let tableHtml =
+        filtered.length === 0
+          ? `<p class="serial-lead" style="margin:0;color:var(--muted)">${entries.length === 0 ? 'No startup rows returned.' : 'No rows match your filter.'}</p>`
+          : `<div class="disk-table-wrap"><table class="pc-disk-table">
+              <thead><tr><th>Name</th><th>User</th><th>Location</th><th>Command</th></tr></thead>
+              <tbody>
+                ${filtered
+                  .map(
+                    (s) => `
+                <tr>
+                  <td>${escPc(s.name || '—')}</td>
+                  <td>${escPc(s.user || '—')}</td>
+                  <td>${escPc(s.location || '—')}</td>
+                  <td>${escPc(s.command || '—')}</td>
+                </tr>`,
+                  )
+                  .join('')}
+              </tbody></table></div>`;
+      parts.push(`<div class="pc-block"><h3>Entries (${filtered.length})</h3>${tableHtml}</div>`);
+
+      return parts.join('');
+    }
+
+    function renderUrlCheck(doc) {
+      if (!doc || typeof doc !== 'object') {
+        return '<div class="pc-block"><p class="pc-err-inline">Invalid response.</p></div>';
+      }
+      if (doc.error) {
+        return `<div class="pc-block"><p class="pc-err-inline">${escPc(String(doc.error))}</p></div>`;
+      }
+      const r = String(doc.risk_score || 'low').toLowerCase();
+      let pillCls = 'url-risk-low';
+      if (r === 'elevated') pillCls = 'url-risk-elevated';
+      if (r === 'medium') pillCls = 'url-risk-medium';
+      if (r === 'high') pillCls = 'url-risk-high';
+      const findings = Array.isArray(doc.findings) ? doc.findings : [];
+      let body = `
+        <div class="pc-block url-check-result">
+          <h3>Link analysis</h3>
+          <p class="serial-lead" style="margin:6px 0 10px;word-break:break-all"><strong>Normalized:</strong> ${escPc(doc.normalized_url || '')}</p>
+          <div class="url-risk-pill ${pillCls}" role="status">${escPc(r)} risk</div>
+        </div>`;
+      if (!findings.length) {
+        body += `<div class="pc-block"><p class="serial-lead" style="margin:0;color:var(--muted)">No strong heuristic flags from the hostname and scheme alone (redirect trace may still add context).</p></div>`;
+      } else {
+        for (const f of findings) {
+          const cls = String(f.tier || '') === 'warning' ? 'url-find-warn' : 'url-find-notice';
+          body += `<div class="${cls}"><strong>${escPc(f.title || '')}</strong><p style="margin:6px 0 0;line-height:1.5">${escPc(f.detail || '')}</p></div>`;
+        }
+      }
+      const probe = doc.redirect_probe;
+      if (probe && Array.isArray(probe.chain) && probe.chain.length) {
+        const detail = probe.fetch_detail ? escPc(String(probe.fetch_detail)) : '';
+        body += `<div class="pc-block"><h4 style="margin:0 0 8px">HTTP HEAD / redirect trace</h4><p class="serial-lead" style="margin:0 0 8px;font-size:0.82rem">${detail}</p>`;
+        body += `<pre class="exe-console url-chain-pre">${escPc(JSON.stringify(probe.chain, null, 2))}</pre></div>`;
+      } else if (probe && probe.fetch_detail) {
+        body += `<div class="pc-block"><p class="serial-lead" style="margin:0">${escPc(String(probe.fetch_detail))}</p></div>`;
+      }
+      if (doc.disclaimer) {
+        body += `<p class="serial-lead" style="margin-top:14px;font-size:0.8rem;color:var(--muted)">${escPc(doc.disclaimer)}</p>`;
+      }
+      return body;
+    }
+
+    function dlFromObj(title, obj, rows) {
+      if (!obj || typeof obj !== 'object') {
+        return `<div class="pc-block"><h3>${escPc(title)}</h3><p class="pc-err-inline">Unavailable</p></div>`;
+      }
+      if (obj.error) {
+        return `<div class="pc-block"><h3>${escPc(title)}</h3><p class="pc-err-inline">${escPc(obj.error)}</p></div>`;
+      }
+      let dl = '';
+      for (const [prop, lab] of rows) {
+        let v = obj[prop];
+        if (v === null || v === undefined || v === '') v = '—';
+        else if (typeof v === 'boolean') v = v ? 'yes' : 'no';
+        dl += `<dt>${escPc(lab)}</dt><dd>${escPc(typeof v === 'object' ? JSON.stringify(v) : String(v))}</dd>`;
+      }
+      return `<div class="pc-block"><h3>${escPc(title)}</h3><dl class="pc-dl">${dl}</dl></div>`;
+    }
+
+    function renderPcSnapshot(doc) {
+      const parts = [];
+
+      const diags = Array.isArray(doc.diagnostics) ? doc.diagnostics : [];
+      if (diags.length) {
+        parts.push(`<div class="pc-diag-bar pc-grid-span-full">${diags.map((d) => `<div><strong>${escPc(d.source)}</strong> · ${escPc(d.detail)}</div>`).join('')}</div>`);
+      }
+      if (doc.notes && typeof doc.notes === 'string') {
+        parts.push(`<p class="serial-lead pc-grid-span-full" style="margin:0">${escPc(doc.notes)}</p>`);
+      }
+
+      parts.push(
+        dlFromObj('Machine (system / product)', doc.machine || {}, [
+          ['manufacturer', 'Manufacturer'],
+          ['model', 'Model'],
+          ['version', 'Version'],
+          ['serial', 'Serial'],
+          ['sku', 'SKU'],
+          ['uuid', 'UUID'],
+          ['virtual', 'Virtual machine'],
+          ['virtual_host', 'Virtual host'],
+        ]),
+      );
+      parts.push(
+        dlFromObj('Motherboard (baseboard)', doc.motherboard || {}, [
+          ['manufacturer', 'Manufacturer'],
+          ['model', 'Model'],
+          ['version', 'Version'],
+          ['serial', 'Serial'],
+          ['asset_tag', 'Asset tag'],
+        ]),
+      );
+      parts.push(
+        dlFromObj('BIOS', doc.bios || {}, [
+          ['vendor', 'Vendor'],
+          ['version', 'Version'],
+          ['release_date', 'Release date'],
+          ['revision', 'Revision'],
+          ['serial', 'Serial'],
+        ]),
+      );
+      parts.push(
+        dlFromObj('Chassis', doc.chassis || {}, [
+          ['manufacturer', 'Manufacturer'],
+          ['model', 'Model'],
+          ['type', 'Type'],
+          ['serial', 'Serial'],
+          ['sku', 'SKU'],
+        ]),
+      );
+      parts.push(
+        dlFromObj('Operating system', doc.os || {}, [
+          ['hostname', 'Hostname'],
+          ['distro', 'OS name'],
+          ['release', 'Release'],
+          ['codename', 'Display version / codename'],
+          ['build', 'Windows build'],
+          ['service_pack', 'Service pack'],
+          ['serial', 'OS serial'],
+          ['kernel', 'Kernel'],
+          ['arch', 'Architecture'],
+          ['hypervisor_present', 'Hypervisor present'],
+          ['uefi', 'UEFI boot'],
+          ['remote_session', 'Remote / RDP session'],
+        ]),
+      );
+
+      const cpuProc = Array.isArray(doc.cpu_processor_wmi) ? doc.cpu_processor_wmi : [];
+      const isWin = doc.node_platform === 'win32';
+
+      let cpuProcHtml = '';
+      if (!cpuProc.length) {
+        cpuProcHtml = `<p class="pc-err-inline" style="margin:6px 0 0">${isWin ? 'No Win32 processor rows (WMI empty or failed).' : 'Only populated on Windows via Win32_Processor WMI.'}</p>`;
+      } else {
+        cpuProcHtml = `
+            <div class="disk-table-wrap">
+              <table class="pc-disk-table">
+                <thead><tr><th>Socket</th><th>Name</th><th>Processor ID (hex)</th></tr></thead>
+                <tbody>
+                  ${cpuProc
+                    .map(
+                      (r) => `
+                    <tr>
+                      <td>${escPc(r.socket_designation || '—')}</td>
+                      <td>${escPc(r.name || '—')}</td>
+                      <td>${escPc(r.processor_id_hex || '—')}</td>
+                    </tr>`,
+                    )
+                    .join('')}
+                </tbody>
+              </table>
+            </div>`;
+      }
+
+      const cpu = doc.cpu;
+      if (!cpu || typeof cpu !== 'object') {
+        parts.push(dlFromObj('CPU summary', { error: 'Unavailable' }));
+      } else if (cpu.error) {
+        parts.push(dlFromObj('CPU summary', { error: cpu.error }));
+      } else {
+        parts.push(dlFromObj('CPU summary', cpu, [
+          ['manufacturer', 'Manufacturer'],
+          ['brand', 'Brand'],
+          ['speed_ghz', 'Base speed (GHz)'],
+          ['speed_max_ghz', 'Max speed (GHz)'],
+          ['cores_physical', 'Physical cores'],
+          ['cores_logical', 'Logical processors'],
+          ['cpus_packages', 'Physical CPU sockets / packages'],
+          ['socket', 'Socket'],
+          ['stepping', 'Stepping'],
+          ['revision', 'Revision'],
+          ['virtualization_reports_hypervisor', 'Guest under hypervisor (CPUID path)'],
+        ]));
+      }
+      parts.push(
+        `<div class="pc-block">
+          <h3>CPU (Win32 WMI — per package)</h3>
+          ${cpuProcHtml}
+        </div>`,
+      );
+
+      const disks = Array.isArray(doc.disks) ? doc.disks : [];
+      let diskHtml = `
+        <div class="pc-block">
+          <h3>Physical / logical disks (layout)</h3>
+          ${disks.length === 0 ? `<p class="pc-err-inline">No disks returned (permission or WMI issue).</p>` : ''}
+        </div>`;
+      if (disks.length) {
+        diskHtml = `
+          <div class="pc-block">
+            <h3>Physical / logical disks (${disks.length})</h3>
+            <div class="disk-table-wrap">
+              <table class="pc-disk-table">
+                <thead><tr><th>Name</th><th>Type</th><th>Size</th><th>Vendor</th><th>Serial</th><th>Firmware</th></tr></thead>
+                <tbody>
+                  ${disks
+                    .map(
+                      (d) => `
+                    <tr>
+                      <td>${escPc(d.name || '—')}</td>
+                      <td>${escPc(d.type || '—')}</td>
+                      <td>${escPc(formatDiskSize(d.size_bytes))}</td>
+                      <td>${escPc(d.vendor || '—')}</td>
+                      <td>${escPc(d.serial || '—')}</td>
+                      <td>${escPc(d.firmware_revision || '—')}</td>
+                    </tr>`,
+                    )
+                    .join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>`;
+      }
+      parts.push(diskHtml);
+
+      const gpus = Array.isArray(doc.gpu_controllers) ? doc.gpu_controllers : [];
+      let gpuHtml =
+        `<div class="pc-block"><h3>GPU / video controllers</h3><p class="pc-err-inline">No GPUs returned.</p></div>`;
+      if (gpus.length) {
+        gpuHtml = `
+          <div class="pc-block">
+            <h3>GPU / video controllers (${gpus.length})</h3>
+            <div class="disk-table-wrap">
+              <table class="pc-disk-table">
+                <thead><tr><th>Vendor</th><th>Model</th><th>VRAM (MB)</th><th>Bus</th><th>PCI SUBSYS (hex)</th><th>Dynamic VRAM</th></tr></thead>
+                <tbody>
+                  ${gpus
+                    .map(
+                      (g) => `
+                    <tr>
+                      <td>${escPc(g.vendor || '—')}</td>
+                      <td>${escPc(g.model || '—')}</td>
+                      <td>${escPc(g.vram_mb != null ? String(g.vram_mb) : '—')}</td>
+                      <td>${escPc(g.bus || '—')}</td>
+                      <td>${escPc(g.pci_subsystem_id_hex || '—')}</td>
+                      <td>${typeof g.vram_dynamic === 'boolean' ? escPc(g.vram_dynamic ? 'yes' : 'no') : '—'}</td>
+                    </tr>`,
+                    )
+                    .join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>`;
+      }
+      parts.push(gpuHtml);
+
+      const views = Array.isArray(doc.gpu_displays) ? doc.gpu_displays : [];
+      let viewHtml =
+        `<div class="pc-block"><h3>Displays (desktop layout)</h3><p class="pc-err-inline">No monitors returned.</p></div>`;
+      if (views.length) {
+        viewHtml = `
+          <div class="pc-block">
+            <h3>Displays (desktop layout, ${views.length})</h3>
+            <div class="disk-table-wrap">
+              <table class="pc-disk-table">
+                <thead><tr><th>Vendor</th><th>Model</th><th>Label</th><th>Main</th><th>Resolution</th><th>Hz</th><th>Connection</th><th>Approx. EDID cm</th><th>Builtin</th></tr></thead>
+                <tbody>
+                  ${views
+                    .map(
+                      (v) => `
+                    <tr>
+                      <td>${escPc(v.vendor || '—')}</td>
+                      <td>${escPc(v.model || '—')}</td>
+                      <td>${escPc(v.label || '—')}</td>
+                      <td>${v.main ? 'yes' : 'no'}</td>
+                      <td>${escPc(v.resolution || '—')}</td>
+                      <td>${escPc(v.refresh_hz != null ? String(v.refresh_hz) : '—')}</td>
+                      <td>${escPc(v.connection || '—')}</td>
+                      <td>${escPc(v.image_size_approx_cm || '—')}</td>
+                      <td>${typeof v.builtin === 'boolean' ? escPc(v.builtin ? 'yes' : 'no') : '—'}</td>
+                    </tr>`,
+                    )
+                    .join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>`;
+      }
+      parts.push(viewHtml);
+
+      const monEdid = Array.isArray(doc.monitor_edid) ? doc.monitor_edid : [];
+      let monHtml =
+        `<div class="pc-block"><h3>Monitors — EDID / WMI IDs</h3><p class="serial-lead" style="margin:0;color:var(--muted)">
+          Parsed from WMI <code>WmiMonitorID</code> (Windows). Matches what many tools read as monitor serial.
+        </p><p class="pc-err-inline" style="margin:10px 0 0">No EDID rows (non-Windows host or WMI blocked).</p></div>`;
+      if (monEdid.length) {
+        monHtml = `
+          <div class="pc-block">
+            <h3>Monitors — EDID / WMI IDs (${monEdid.length})</h3>
+            <div class="disk-table-wrap">
+              <table class="pc-disk-table">
+                <thead><tr><th>Manufacturer</th><th>Friendly name</th><th>Product code ID</th><th>Serial (EDID)</th><th>Instance</th></tr></thead>
+                <tbody>
+                  ${monEdid
+                    .map(
+                      (m) => `
+                    <tr>
+                      <td>${escPc(m.manufacturer || '—')}</td>
+                      <td>${escPc(m.friendly_name || '—')}</td>
+                      <td>${escPc(m.product_code_id || '—')}</td>
+                      <td>${escPc(m.serial_edid || '—')}</td>
+                      <td>${escPc(m.instance_name || '—')}</td>
+                    </tr>`,
+                    )
+                    .join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>`;
+      }
+      parts.push(monHtml);
+
+      const mods = Array.isArray(doc.memory_modules) ? doc.memory_modules : [];
+      let memHtml =
+        `<div class="pc-block"><h3>Memory modules (per DIMM)</h3><p class="pc-err-inline">No DIMM rows (non-Windows or permission).</p></div>`;
+      if (mods.length) {
+        memHtml = `
+          <div class="pc-block">
+            <h3>Memory modules (${mods.length})</h3>
+            <div class="disk-table-wrap">
+              <table class="pc-disk-table">
+                <thead><tr><th>Bank</th><th>Type</th><th>Form factor</th><th>Size</th><th>Speed MHz</th><th>Manufacturer</th><th>Part #</th><th>Serial</th><th>ECC</th></tr></thead>
+                <tbody>
+                  ${mods
+                    .map(
+                      (m) => `
+                    <tr>
+                      <td>${escPc(m.bank || '—')}</td>
+                      <td>${escPc(m.type || '—')}</td>
+                      <td>${escPc(m.form_factor || '—')}</td>
+                      <td>${escPc(formatDiskSize(m.size_bytes))}</td>
+                      <td>${escPc(m.speed_mhz != null && m.speed_mhz > 0 ? String(m.speed_mhz) : '—')}</td>
+                      <td>${escPc(m.manufacturer || '—')}</td>
+                      <td>${escPc(m.part_number || '—')}</td>
+                      <td>${escPc(m.serial || '—')}</td>
+                      <td>${typeof m.ecc === 'boolean' ? escPc(m.ecc ? 'yes' : 'no') : '—'}</td>
+                    </tr>`,
+                    )
+                    .join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>`;
+      }
+      parts.push(memHtml);
+
+      return parts.join('');
+    }
+
+    const pcScanBtn = document.getElementById('pc-scan-btn');
+    const pcCopyBtn = document.getElementById('pc-copy-btn');
+    const pcCopyPlainBtn = document.getElementById('pc-copy-plain-btn');
+    const pcSerialDumpPlain = document.getElementById('pc-serial-dump-plain');
+    const pcScanMount = document.getElementById('pc-scan-mount');
+    const pcScanStatus = document.getElementById('pc-scan-status');
+    const threatHintsBtn = document.getElementById('threat-hints-btn');
+    const threatCopyBtn = document.getElementById('threat-copy-btn');
+    const defenderScanBtn = document.getElementById('defender-scan-btn');
+    const threatMount = document.getElementById('threat-mount');
+    const threatScanStatus = document.getElementById('threat-scan-status');
+    const startupScanBtn = document.getElementById('startup-scan-btn');
+    const startupCopyBtn = document.getElementById('startup-copy-btn');
+    const startupDownloadBtn = document.getElementById('startup-download-btn');
+    const startupFilterInput = document.getElementById('startup-filter-input');
+    const startupMount = document.getElementById('startup-mount');
+    const startupScanStatus = document.getElementById('startup-scan-status');
+    const defenderScanOut = document.getElementById('defender-scan-out');
+    const externalExeHint = document.getElementById('external-exe-hint');
+    const externalExeCapture = document.getElementById('external-exe-capture');
+    const externalExeRun = document.getElementById('external-exe-run');
+    const externalExeOut = document.getElementById('external-exe-out');
+    const externalSerialPaste = document.getElementById('external-serial-paste');
+    const externalSerialCompareBtn = document.getElementById('external-serial-compare-btn');
+    const externalSerialCompareMount = document.getElementById('external-serial-compare-mount');
+
+    function refreshExternalSerialCompareButtonState() {
+      const btn = externalSerialCompareBtn || document.getElementById('external-serial-compare-btn');
+      if (!btn) return;
+      if (!lastPcSnapshot) {
+        btn.disabled = true;
+        btn.title = 'Run Scan this PC on Hardware / serials tab first.';
+        return;
+      }
+      btn.disabled = false;
+      btn.title = 'Match identifiers from hub WMI snapshot against pasted / captured external report text.';
+    }
+    const changelogDetails = document.getElementById('rail-changelog');
+    const changelogPre = document.getElementById('changelog-pre');
+    const railMetaVersion = document.getElementById('rail-meta-version');
+    const urlCheckForm = document.getElementById('url-check-form');
+    const urlCheckInput = document.getElementById('url-check-input');
+    const urlCheckSubmit = document.getElementById('url-check-submit');
+    const urlCheckStatus = document.getElementById('url-check-status');
+    const urlCheckMount = document.getElementById('url-check-mount');
+    const homeStartupPaste = document.getElementById('home-startup-paste');
+    const homeStartupParseBtn = document.getElementById('home-startup-parse-btn');
+    const homeStartupClearBtn = document.getElementById('home-startup-clear-btn');
+    const homeStartupParseStatus = document.getElementById('home-startup-parse-status');
+    const homeStartupLogDetails = document.getElementById('home-startup-log-details');
+    const homeStartupLogPre = document.getElementById('home-startup-log-pre');
+    const homeStartupMount = document.getElementById('home-startup-mount');
+
+    async function refreshExternalSerialCheckerUi(opts) {
+      const preserveOut = !!(opts && opts.preserveExeOutput);
+      if (!externalExeHint || !externalExeRun || !externalExeOut) return;
+      if (!preserveOut) {
+        externalExeOut.textContent = 'Output appears here.';
+        externalExeOut.classList.add('muted-console');
+      }
+      externalExeRun.disabled = true;
+      try {
+        const res = await fetch('/api/external-serial-checker/status');
+        /** @type {any} */
+        const st = await parseApiJsonBody(res);
+        if (!res.ok || st?.error) {
+          externalExeHint.innerHTML =
+            '<strong style="font-weight:700;color:var(--text)">Not available</strong> — open this hub on localhost to query status.';
+          return;
+        }
+        if (!st.configured) {
+          externalExeHint.innerHTML =
+            'Set <code style="font-family:JetBrains Mono,monospace;font-size:0.86em;">SERIAL_CHECKER_EXE</code> in your <strong style="font-weight:700;color:var(--text)">.env</strong> (path to your working .exe, relative to server folder or absolute), restart Node, refresh this page.';
+          return;
+        }
+        if (!st.exists) {
+          externalExeHint.textContent =
+            `.env points at SERIAL_CHECKER_EXE but that file path was not found. Check spelling and slashes. (${st.basename})`;
+          return;
+        }
+        externalExeHint.textContent = `Configured: ${st.basename}. Default run starts the program in the background without waiting — use that for GUIs like this checker. Tick “Wait for exit…” below only if your tool is CLI-only and prints to the console.`;
+        externalExeRun.disabled = false;
+      } catch {
+        externalExeHint.textContent = 'Could not reach external checker status.';
+      }
+    }
+
+    externalExeRun?.addEventListener('click', async () => {
+      if (!externalExeRun || !externalExeOut) return;
+      externalExeRun.disabled = true;
+      externalExeOut.classList.remove('muted-console');
+      externalExeOut.textContent = 'Running…';
+      try {
+        const res = await fetch('/api/external-serial-checker/run', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ detach: !externalExeCapture?.checked }),
+        });
+        /** @type {any} */
+        const out = await parseApiJsonBody(res);
+        const lines = [];
+        if (!res.ok) {
+          if (out?.error) lines.push(String(out.error));
+        } else if (out?.detached === true && out.ok) {
+          if (out.message) lines.push(String(out.message));
+        } else {
+          if (!out.ok) {
+            if (out.timed_out) lines.push('(Timed out)');
+            if (out.error) lines.push(String(out.error));
+            if (typeof out.exit_code === 'number') lines.push(`Exit code: ${out.exit_code}`);
+          }
+          if (out.stdout) lines.push('— stdout —\n' + String(out.stdout));
+          if (out.stderr) lines.push('— stderr —\n' + String(out.stderr));
+          if (!lines.length) lines.push('(No stdout/stderr)');
+        }
+        externalExeOut.textContent = lines.filter(Boolean).join('\n\n');
+        if (
+          res.ok &&
+          out &&
+          !(out.detached === true && out.ok) &&
+          (String(out.stdout || '').trim().length || String(out.stderr || '').trim().length)
+        ) {
+          lastExternalCapturedText = [out.stdout, out.stderr].filter(Boolean).join('\n\n').trim();
+          if (externalSerialPaste && !externalSerialPaste.value.trim()) externalSerialPaste.value = lastExternalCapturedText;
+        }
+      } catch (e) {
+        externalExeOut.textContent = String(e.message || e);
+      } finally {
+        await refreshExternalSerialCheckerUi({ preserveExeOutput: true });
+      }
+    });
+
+    refreshExternalSerialCompareButtonState();
+
+    externalSerialCompareBtn?.addEventListener('click', () => {
+      if (!externalSerialCompareMount) return;
+      if (!lastPcSnapshot) {
+        externalSerialCompareMount.innerHTML =
+          '<div class="pc-block"><p class="pc-err-inline">Run Scan this PC first.</p></div>';
+        return;
+      }
+      const typed = externalSerialPaste?.value?.trim() || '';
+      const combined = typed || lastExternalCapturedText.trim();
+      externalSerialCompareMount.innerHTML = renderSerialCompareInner(lastPcSnapshot, combined);
+    });
+
+    externalSerialPaste?.addEventListener('input', () => {
+      if (externalSerialCompareMount && externalSerialCompareMount.childElementCount > 0) externalSerialCompareMount.innerHTML = '';
+    });
+
+    let changelogLoaded = false;
+    changelogDetails?.addEventListener('toggle', async () => {
+      if (!changelogDetails.open || !changelogPre || !railMetaVersion) return;
+      if (changelogLoaded) return;
+      changelogLoaded = true;
+      railMetaVersion.textContent = 'Loading…';
+      try {
+        const res = await fetch('/api/meta');
+        /** @type {any} */
+        const data = await parseApiJsonBody(res);
+        if (!res.ok) {
+          changelogLoaded = false;
+          railMetaVersion.textContent = res.status >= 400 ? `Error ${res.status}` : `HTTP ${res.status}`;
+          changelogPre.textContent = data?.error ? String(data.error) : '(No body)';
+          return;
+        }
+        railMetaVersion.textContent = `${data.name ?? 'steamwebbot'} · v${data.version ?? '?'}`;
+        changelogPre.textContent =
+          typeof data.changelog_md === 'string' && data.changelog_md.trim()
+            ? data.changelog_md
+            : '(CHANGELOG.md missing or empty on server.)';
+      } catch (e) {
+        changelogLoaded = false;
+        railMetaVersion.textContent = 'Could not reach /api/meta';
+        changelogPre.textContent = String(e.message || e);
+      }
+    });
+
+    urlCheckForm?.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const q = urlCheckInput?.value?.trim() || '';
+      if (!urlCheckMount || !urlCheckSubmit || !urlCheckStatus) return;
+      urlCheckMount.innerHTML = '';
+      if (!q) {
+        urlCheckStatus.textContent = 'Paste a URL first.';
+        return;
+      }
+      urlCheckSubmit.disabled = true;
+      urlCheckStatus.textContent = 'Analyzing…';
+      try {
+        const res = await fetch('/api/check-url', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: q }),
+        });
+        /** @type {any} */
+        const data = await parseApiJsonBody(res);
+        if (!res.ok && data?.error) {
+          urlCheckMount.innerHTML = `<div class="pc-block"><p class="pc-err-inline">${escPc(String(data.error))}</p></div>`;
+          urlCheckStatus.textContent = 'Request finished with an error.';
+        } else {
+          urlCheckMount.innerHTML = renderUrlCheck(data);
+          urlCheckStatus.textContent = 'Done.';
+        }
+      } catch (e) {
+        urlCheckMount.innerHTML = `<div class="pc-block"><p class="pc-err-inline">${escPc(String(e.message || e))}</p></div>`;
+        urlCheckStatus.textContent = 'Failed.';
+      } finally {
+        urlCheckSubmit.disabled = false;
+      }
+    });
+
+    pcScanBtn?.addEventListener('click', async () => {
+      if (!pcScanMount || !pcScanBtn) return;
+      lastPcSnapshot = null;
+      refreshExternalSerialCompareButtonState();
+      pcScanBtn.disabled = true;
+      if (pcCopyBtn) pcCopyBtn.disabled = true;
+      pcScanMount.innerHTML = '';
+      if (pcSerialDumpPlain) {
+        pcSerialDumpPlain.textContent = 'Scan running…';
+        pcSerialDumpPlain.classList.add('muted-console');
+      }
+      if (pcCopyPlainBtn) pcCopyPlainBtn.disabled = true;
+      if (pcScanStatus) pcScanStatus.textContent = 'Reading WMI / SMBIOS / graphics…';
+      try {
+        const res = await fetch('/api/pc-serials');
+        /** @type {any} */
+        const data = await parseApiJsonBody(res);
+        if (!res.ok) throw new Error(data?.error || `HTTP ${res.status}`);
+        lastPcSnapshot = data;
+        pcScanMount.innerHTML = renderPcSnapshot(data);
+        if (typeof data.serial_dump_text === 'string' && data.serial_dump_text.length && pcSerialDumpPlain) {
+          pcSerialDumpPlain.textContent = data.serial_dump_text;
+          pcSerialDumpPlain.classList.remove('muted-console');
+          if (pcCopyPlainBtn) pcCopyPlainBtn.disabled = false;
+        } else if (pcSerialDumpPlain) {
+          pcSerialDumpPlain.textContent = 'No plaintext report in response (restart Node server after updating).';
+          pcSerialDumpPlain.classList.remove('muted-console');
+          if (pcCopyPlainBtn) pcCopyPlainBtn.disabled = true;
+        }
+        const when = data.scanned_at ? new Date(data.scanned_at).toLocaleString() : '';
+        if (pcScanStatus) pcScanStatus.textContent = `Scan complete.${when ? ` ${when}` : ''}`;
+        if (pcCopyBtn) pcCopyBtn.disabled = false;
+        refreshExternalSerialCompareButtonState();
+      } catch (e) {
+        const msg = e.message || '';
+        pcScanMount.innerHTML = `<div class="pc-block pc-grid-span-full"><h3>Error</h3><p class="pc-err-inline">${escPc(msg)}</p><p class="serial-lead" style="margin:10px 0 0;color:var(--muted)">
+          Tip: open this hub as <strong style="color:var(--text)">http://127.0.0.1:${location.port}</strong> / <strong style="color:var(--text)">localhost:${location.port}</strong> — the API rejects non-loopback IPs. Restart Node after pulling updates so routes load before static files.
+        </p></div>`;
+        if (pcScanStatus) pcScanStatus.textContent = 'Scan failed.';
+        if (pcSerialDumpPlain) {
+          pcSerialDumpPlain.textContent = 'Scan failed.';
+          pcSerialDumpPlain.classList.add('muted-console');
+        }
+        if (pcCopyPlainBtn) pcCopyPlainBtn.disabled = true;
+        refreshExternalSerialCompareButtonState();
+      } finally {
+        pcScanBtn.disabled = false;
+      }
+    });
+
+    pcCopyBtn?.addEventListener('click', async () => {
+      if (!lastPcSnapshot || !navigator.clipboard?.writeText) return;
+      try {
+        await navigator.clipboard.writeText(JSON.stringify(lastPcSnapshot, null, 2));
+        if (pcScanStatus) pcScanStatus.textContent = `${pcScanStatus.textContent || ''} JSON copied.`.trimStart();
+      } catch { /* ignore */ }
+    });
+
+    pcCopyPlainBtn?.addEventListener('click', async () => {
+      const t =
+        lastPcSnapshot && typeof lastPcSnapshot.serial_dump_text === 'string'
+          ? lastPcSnapshot.serial_dump_text
+          : '';
+      if (!t || !navigator.clipboard?.writeText) return;
+      try {
+        await navigator.clipboard.writeText(t);
+        if (pcScanStatus)
+          pcScanStatus.textContent = `${pcScanStatus.textContent || ''} Plain report copied.`.trimStart();
+      } catch { /* ignore */ }
+    });
+
+    threatHintsBtn?.addEventListener('click', async () => {
+      if (!threatMount) return;
+      lastThreatDoc = null;
+      threatHintsBtn.disabled = true;
+      if (threatCopyBtn) threatCopyBtn.disabled = true;
+      threatMount.innerHTML = '';
+      if (threatScanStatus) threatScanStatus.textContent = 'Scanning processes, Defender WMI, startups…';
+      try {
+        const res = await fetch('/api/pc-threat-hints');
+        /** @type {any} */
+        const data = await parseApiJsonBody(res);
+        if (!res.ok) throw new Error(data?.error || `HTTP ${res.status}`);
+        lastThreatDoc = data;
+        threatMount.innerHTML = renderThreatHints(data);
+        const when = data.scanned_at ? new Date(data.scanned_at).toLocaleString() : '';
+        if (threatScanStatus)
+          threatScanStatus.textContent = `Hint scan done.${when ? ` ${when}` : ''}`;
+        if (threatCopyBtn) threatCopyBtn.disabled = false;
+      } catch (e) {
+        const msg = e.message || '';
+        threatMount.innerHTML = `<div class="pc-block pc-grid-span-full"><h3>Error</h3><p class="pc-err-inline">${escPc(msg)}</p></div>`;
+        if (threatScanStatus) threatScanStatus.textContent = 'Hint scan failed.';
+      } finally {
+        threatHintsBtn.disabled = false;
+      }
+    });
+
+    threatCopyBtn?.addEventListener('click', async () => {
+      if (!lastThreatDoc || !navigator.clipboard?.writeText) return;
+      try {
+        await navigator.clipboard.writeText(JSON.stringify(lastThreatDoc, null, 2));
+        if (threatScanStatus)
+          threatScanStatus.textContent = `${threatScanStatus.textContent || ''} JSON copied.`.trimStart();
+      } catch { /* ignore */ }
+    });
+
+    function paintStartupMount() {
+      if (!startupMount) return;
+      const q = startupFilterInput?.value?.trim().toLowerCase() || '';
+      startupMount.innerHTML = lastStartupDoc
+        ? renderStartupApps(lastStartupDoc, q)
+        : '<p class="serial-lead" style="margin:0;color:var(--muted)">Use <strong style="font-weight:650;color:var(--text)">Refresh list</strong> to load from WMI.</p>';
+    }
+
+    let startupFetchInFlight = false;
+
+    /**
+     * @param {boolean} isManualRefresh - clear snapshot and re-query (Refresh button)
+     */
+    async function runStartupAppsFetch(isManualRefresh) {
+      if (!startupMount) return;
+      if (startupFetchInFlight) return;
+      startupFetchInFlight = true;
+      if (isManualRefresh) lastStartupDoc = null;
+      if (startupScanBtn) startupScanBtn.disabled = true;
+      if (startupCopyBtn) startupCopyBtn.disabled = true;
+      if (startupDownloadBtn) startupDownloadBtn.disabled = true;
+      startupMount.innerHTML =
+        '<p class="serial-lead" style="margin:0;color:var(--muted)">Querying <code style="font-family:JetBrains Mono,monospace;font-size:0.86em">Win32_StartupCommand</code>…</p>';
+      if (startupScanStatus) startupScanStatus.textContent = 'Querying WMI…';
+      try {
+        const res = await fetch('/api/startup-apps');
+        /** @type {any} */
+        const data = await parseApiJsonBody(res);
+        if (!res.ok) throw new Error(data?.error || `HTTP ${res.status}`);
+        lastStartupDoc = data;
+        paintStartupMount();
+        const when = data.scanned_at ? new Date(data.scanned_at).toLocaleString() : '';
+        if (startupScanStatus) startupScanStatus.textContent = `Loaded.${when ? ` ${when}` : ''}`;
+        if (startupCopyBtn) startupCopyBtn.disabled = false;
+        if (startupDownloadBtn) startupDownloadBtn.disabled = false;
+      } catch (e) {
+        const msg = e.message || '';
+        startupMount.innerHTML = `<div class="pc-block pc-grid-span-full"><h3>Error</h3><p class="pc-err-inline">${escPc(msg)}</p><p class="serial-lead" style="margin:10px 0 0;color:var(--muted)">
+          Use <strong style="color:var(--text)">http://127.0.0.1:${location.port}</strong> or <strong style="color:var(--text)">localhost:${location.port}</strong>.</p></div>`;
+        if (startupScanStatus) startupScanStatus.textContent = 'Request failed.';
+        if (startupDownloadBtn) startupDownloadBtn.disabled = true;
+      } finally {
+        startupFetchInFlight = false;
+        if (startupScanBtn) startupScanBtn.disabled = false;
+      }
+    }
+
+    startupScanBtn?.addEventListener('click', () => {
+      void runStartupAppsFetch(true);
+    });
+
+    startupFilterInput?.addEventListener('input', () => {
+      if (!lastStartupDoc) return;
+      paintStartupMount();
+    });
+
+    startupCopyBtn?.addEventListener('click', async () => {
+      if (!lastStartupDoc || !navigator.clipboard?.writeText) return;
+      try {
+        await navigator.clipboard.writeText(JSON.stringify(lastStartupDoc, null, 2));
+        if (startupScanStatus)
+          startupScanStatus.textContent = `${startupScanStatus.textContent || ''} JSON copied.`.trimStart();
+      } catch { /* ignore */ }
+    });
+
+    startupDownloadBtn?.addEventListener('click', () => {
+      const doc = lastStartupDoc;
+      if (!doc || typeof doc !== 'object') return;
+      const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+      const blob = new Blob([JSON.stringify(doc, null, 2)], { type: 'application/json;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `galaxy-startup-report-${stamp}.json`;
+      a.rel = 'noopener';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      if (startupScanStatus)
+        startupScanStatus.textContent = `${startupScanStatus.textContent || ''} Report downloaded.`.trimStart();
+    });
+
+    homeStartupParseBtn?.addEventListener('click', () => {
+      if (!homeStartupMount || !homeStartupParseStatus) return;
+      const raw = homeStartupPaste?.value ?? '';
+      homeStartupParseStatus.textContent = '';
+      homeStartupMount.innerHTML = '';
+      if (homeStartupLogPre) homeStartupLogPre.textContent = '';
+      if (homeStartupLogDetails) {
+        homeStartupLogDetails.open = false;
+        homeStartupLogDetails.setAttribute('hidden', '');
+      }
+      const parsed = extractFirstJsonObject(raw);
+      if (!parsed || typeof parsed !== 'object') {
+        homeStartupParseStatus.textContent =
+          'Could not parse JSON. Paste the full downloaded report file, use Copy JSON from Startup apps, or ensure one JSON object is in the box.';
+        return;
+      }
+      const doc = normalizeHomeStartupPaste(parsed);
+      homeStartupMount.innerHTML = renderStartupApps(doc, '');
+      const n = doc.entries.length;
+      homeStartupParseStatus.textContent =
+        n === 0 ? 'Parsed OK — no startup rows in file (still showing summary).' : `Parsed OK — ${n} row(s).`;
+      if (doc.report_log && homeStartupLogPre && homeStartupLogDetails) {
+        homeStartupLogPre.textContent = doc.report_log;
+        homeStartupLogDetails.removeAttribute('hidden');
+      }
+    });
+
+    homeStartupClearBtn?.addEventListener('click', () => {
+      if (homeStartupPaste) homeStartupPaste.value = '';
+      if (homeStartupMount) homeStartupMount.innerHTML = '';
+      if (homeStartupParseStatus) homeStartupParseStatus.textContent = '';
+      if (homeStartupLogPre) homeStartupLogPre.textContent = '';
+      if (homeStartupLogDetails) {
+        homeStartupLogDetails.open = false;
+        homeStartupLogDetails.setAttribute('hidden', '');
+      }
+    });
+
+    defenderScanBtn?.addEventListener('click', async () => {
+      if (!defenderScanOut) return;
+      defenderScanBtn.disabled = true;
+      if (threatHintsBtn) threatHintsBtn.disabled = true;
+      defenderScanOut.classList.remove('muted-console');
+      defenderScanOut.textContent = `Starting Defender quick scan (can take several minutes — timeout configurable via DEFENDER_SCAN_TIMEOUT_MS in .env)…`;
+      try {
+        const res = await fetch('/api/defender-quick-scan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: '{}',
+        });
+        /** @type {any} */
+        const out = await parseApiJsonBody(res);
+        const lines = [];
+        if (out.timed_out) lines.push('(Timed out)');
+        if (typeof out.exit_code === 'number') lines.push(`Exit code: ${out.exit_code}`);
+        if (out.error && String(out.error).length && !out.ok) lines.push(`Error line: ${out.error}`);
+        if (out.stdout) lines.push('— MpCmdRun stdout —\n' + String(out.stdout));
+        if (out.stderr) lines.push('— MpCmdRun stderr —\n' + String(out.stderr));
+        defenderScanOut.textContent = lines.filter(Boolean).join('\n\n') || '(Scan finished — no textual output)';
+      } catch (e) {
+        defenderScanOut.textContent = String(e.message || e);
+      } finally {
+        defenderScanBtn.disabled = false;
+        if (threatHintsBtn) threatHintsBtn.disabled = false;
+      }
+    });
+
+    const licenseRefreshBtn = document.getElementById('license-refresh-btn');
+    const licenseStatus = document.getElementById('license-status');
+    const licenseProductName = document.getElementById('license-product-name');
+    const licenseProductDesc = document.getElementById('license-product-desc');
+    const licenseProductAddBtn = document.getElementById('license-product-add-btn');
+    const licenseGenProduct = document.getElementById('license-gen-product');
+    const licenseGenCount = document.getElementById('license-gen-count');
+    const licenseGenDuration = document.getElementById('license-gen-duration');
+    const licenseGenNote = document.getElementById('license-gen-note');
+    const licenseGenBtn = document.getElementById('license-gen-btn');
+    const licenseProductsMount = document.getElementById('license-products-mount');
+    const licenseKeysSort = document.getElementById('license-keys-sort');
+    const licenseKeysFilterProduct = document.getElementById('license-keys-filter-product');
+    const licenseKeysFilterPlan = document.getElementById('license-keys-filter-plan');
+    const licenseKeysMount = document.getElementById('license-keys-mount');
+
+    /** @type {{ products: any[], keys: any[] } | null} */
+    let lastLicenseDashboard = null;
+
+    /**
+     * Plain text field — `.value` tracks typing immediately (type=number often lagged until blur).
+     * @returns {{ ok: boolean, days: number | null, message?: string }}
+     */
+    function readLicenseDurationDays() {
+      const el = licenseGenDuration;
+      if (!el) return { ok: true, days: null };
+      let raw = String(el.value ?? '').trim().replace(/,/g, '').replace(/\u2014/g, '').trim();
+      if (raw === '' || raw === '-' || raw.toLowerCase() === 'optional') return { ok: true, days: null };
+      const lead = raw.match(/^(\d+(?:\.\d+)?)/);
+      const n = lead ? Number(lead[1]) : Number(raw);
+      if (!Number.isFinite(n) || n <= 0) {
+        return { ok: false, days: null, message: 'Duration must be a positive number or leave blank for no expiry.' };
+      }
+      const floored = Math.min(36500, Math.floor(n));
+      if (floored <= 0) {
+        return { ok: false, days: null, message: 'Duration must be a positive number or leave blank for no expiry.' };
+      }
+      return { ok: true, days: floored };
+    }
+
+    /** @param {any} k */
+    function resolveLicenseKeyExpiresAt(k) {
+      if (k.expires_at) return k.expires_at;
+      let dd = k.duration_days;
+      if (typeof dd === 'string') dd = Number(dd);
+      if (typeof dd === 'number' && Number.isFinite(dd) && dd > 0 && k.created_at) {
+        const t = new Date(k.created_at).getTime();
+        if (Number.isFinite(t)) return new Date(t + Math.floor(dd) * 86400000).toISOString();
+      }
+      return '';
+    }
+
+    /**
+     * Plan bucket from duration_days or inferred span created→expires.
+     * Day = 1d, Week = 6–8d, Month = 28–31d, Lifetime = no expiry.
+     * @param {any} k
+     * @returns {'lifetime'|'day'|'week'|'month'|'other'}
+     */
+    function getLicenseKeyPlanBucket(k) {
+      const expIso = resolveLicenseKeyExpiresAt(k);
+      if (!expIso) return 'lifetime';
+
+      let dd = k.duration_days;
+      if (typeof dd === 'string') dd = Number(dd);
+
+      /** @param {number} d */
+      function classifyRoundedDays(d) {
+        const n = Math.floor(d);
+        if (n === 1) return 'day';
+        if (n >= 6 && n <= 8) return 'week';
+        if (n >= 28 && n <= 31) return 'month';
+        return 'other';
+      }
+
+      if (typeof dd === 'number' && Number.isFinite(dd) && dd > 0) {
+        return classifyRoundedDays(dd);
+      }
+
+      const t0 = new Date(k.created_at || 0).getTime();
+      const t1 = new Date(expIso).getTime();
+      if (!Number.isFinite(t0) || !Number.isFinite(t1)) return 'other';
+      const approx = Math.round((t1 - t0) / 86400000);
+      return classifyRoundedDays(approx);
+    }
+
+    /** @param {any} k */
+    function licenseKeyPlanLabel(k) {
+      const b = getLicenseKeyPlanBucket(k);
+      if (b === 'lifetime') return 'Lifetime';
+
+      let dd = k.duration_days;
+      if (typeof dd === 'string') dd = Number(dd);
+      if (typeof dd === 'number' && Number.isFinite(dd) && dd > 0) {
+        const n = Math.floor(dd);
+        if (b === 'day') return `Day (${n}d)`;
+        if (b === 'week') return `Week (${n}d)`;
+        if (b === 'month') return `Month (${n}d)`;
+        return `Timed (${n}d)`;
+      }
+
+      const expIso = resolveLicenseKeyExpiresAt(k);
+      const t0 = new Date(k.created_at || 0).getTime();
+      const t1 = new Date(expIso).getTime();
+      const approx =
+        Number.isFinite(t0) && Number.isFinite(t1)
+          ? Math.round((t1 - t0) / 86400000)
+          : null;
+
+      if (b === 'day') return approx != null ? `Day (~${approx}d)` : 'Day';
+      if (b === 'week') return approx != null ? `Week (~${approx}d)` : 'Week';
+      if (b === 'month') return approx != null ? `Month (~${approx}d)` : 'Month';
+      return approx != null ? `Timed (~${approx}d)` : 'Other timed';
+    }
+
+    /** @param {any[]} keys */
+    function filterLicenseKeysByUi(keys) {
+      let out = keys.slice();
+      const pid = licenseKeysFilterProduct?.value?.trim() || '';
+      if (pid) {
+        out = out.filter((k) => (k.product_id && String(k.product_id).trim()) === pid);
+      }
+      const plan = licenseKeysFilterPlan?.value?.trim() || '';
+      if (plan) {
+        out = out.filter((k) => getLicenseKeyPlanBucket(k) === plan);
+      }
+      return out;
+    }
+
+    /** @param {any[]} products */
+    function fillLicenseKeysProductFilter(products) {
+      const sel = licenseKeysFilterProduct;
+      if (!sel) return;
+      const keep = sel.value;
+      sel.innerHTML = '';
+      const all = document.createElement('option');
+      all.value = '';
+      all.textContent = 'All products';
+      sel.appendChild(all);
+      for (const p of products || []) {
+        if (!p?.id) continue;
+        const o = document.createElement('option');
+        o.value = p.id;
+        o.textContent = p.name || p.id;
+        sel.appendChild(o);
+      }
+      if (keep && (keep === '' || products.some((p) => p.id === keep))) {
+        sel.value = keep;
+      }
+    }
+
+    /** @param {any} k @param {number} now */
+    function formatLicenseExpiresCell(k, now) {
+      const expRaw = resolveLicenseKeyExpiresAt(k);
+      if (!expRaw) return 'Never';
+      const expMs = new Date(expRaw).getTime();
+      const expired = Number.isFinite(expMs) && expMs < now;
+      const when = Number.isFinite(expMs) ? new Date(expRaw).toLocaleString() : String(expRaw);
+      let dd = k.duration_days;
+      if (typeof dd === 'string') dd = Number(dd);
+      const snap =
+        typeof dd === 'number' && Number.isFinite(dd) && dd > 0 ? ` (${Math.floor(dd)}d)` : '';
+      if (expired) {
+        return `<span style="color:#f87171">${escPc(when)}${escPc(snap)} · expired</span>`;
+      }
+      return escPc(when) + escPc(snap);
+    }
+
+    /** @param {any[]} keys @param {string} mode */
+    function sortKeysInLicenseGroup(keys, mode) {
+      const arr = keys.slice();
+      const created = (k) => new Date(k.created_at || 0).getTime();
+      switch (mode) {
+        case 'created_asc':
+          arr.sort((a, b) => created(a) - created(b));
+          break;
+        case 'created_desc':
+        case 'product_asc':
+        case 'product_desc':
+        default:
+          arr.sort((a, b) => created(b) - created(a));
+          break;
+      }
+      return arr;
+    }
+
+    /**
+     * @param {{ pid: string, title: string, keys: any[] }[]} groups
+     * @param {string} mode
+     */
+    function sortLicenseKeyGroups(groups, mode) {
+      const titleOf = (g) => String(g.title || '').toLowerCase();
+      const maxC = (g) =>
+        g.keys.length ? Math.max(...g.keys.map((k) => new Date(k.created_at || 0).getTime())) : 0;
+      const minC = (g) =>
+        g.keys.length
+          ? Math.min(...g.keys.map((k) => new Date(k.created_at || 0).getTime()))
+          : Infinity;
+      switch (mode) {
+        case 'product_asc':
+          groups.sort((a, b) => titleOf(a).localeCompare(titleOf(b)));
+          break;
+        case 'product_desc':
+          groups.sort((a, b) => titleOf(b).localeCompare(titleOf(a)));
+          break;
+        case 'created_asc':
+          groups.sort((a, b) => minC(a) - minC(b));
+          break;
+        case 'created_desc':
+        default:
+          groups.sort((a, b) => maxC(b) - maxC(a));
+          break;
+      }
+    }
+
+    /** @param {any[]} rawKeys @param {string} mode */
+    function renderLicenseKeysGrouped(rawKeys, mode) {
+      if (!licenseKeysMount || !rawKeys.length) return;
+
+      const products = lastLicenseDashboard?.products || [];
+      /** @type {Record<string, string>} */
+      const idToName = {};
+      for (const p of products) {
+        if (p && p.id) idToName[p.id] = p.name || p.id;
+      }
+
+      const byPid = new Map();
+      for (const k of rawKeys) {
+        const pid = (k.product_id && String(k.product_id).trim()) || '__orphan__';
+        if (!byPid.has(pid)) byPid.set(pid, []);
+        byPid.get(pid).push(k);
+      }
+
+      /** @type {{ pid: string, title: string, keys: any[] }[]} */
+      const groups = [...byPid.entries()].map(([pid, ks]) => {
+        const title =
+          pid === '__orphan__'
+            ? 'Unknown product'
+            : idToName[pid] || ks[0]?.product_name_snapshot || pid;
+        return { pid, title, keys: sortKeysInLicenseGroup(ks, mode) };
+      });
+
+      sortLicenseKeyGroups(groups, mode);
+
+      const now = Date.now();
+      const blocks = groups.map((g) => {
+        const hid = `license-keys-gr-${String(g.pid).replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+        const titleHtml = `Issued keys · ${escPc(g.title)}`;
+        const meta =
+          g.pid === '__orphan__'
+            ? `${g.keys.length} key(s)`
+            : `${g.keys.length} key(s) · <span style="font-family:JetBrains Mono,monospace;font-size:0.74rem;opacity:0.72">${escPc(g.pid)}</span>`;
+        const rows = g.keys
+          .map((k) => {
+            const hwRaw = k.hwid != null && String(k.hwid).trim() !== '' ? String(k.hwid).trim() : '';
+            const hwCell = hwRaw
+              ? `<span class="license-row-hwid-value" title="${escPc(hwRaw)}">${escPc(hwRaw)}</span>`
+              : '<span class="license-row-hwid-none">Not bound</span>';
+            const resetHwidBtn = `<button type="button" class="serial-btn-ghost${hwRaw ? '' : ' license-reset-hwid-muted'}" data-license-reset-hwid="${escPc(k.id)}" data-license-hwid-empty="${hwRaw ? '0' : '1'}" title="${hwRaw ? 'Reset removes HWID so this key can bind another machine' : 'Bind first via POST /api/license/keys/bind — nothing to reset yet'}">Reset HWID</button>`;
+            return `
+        <tr>
+          <td style="font-family:JetBrains Mono,monospace;font-size:0.76rem;font-weight:600">${escPc(k.key || '')}</td>
+          <td>${escPc(licenseKeyPlanLabel(k))}</td>
+          <td>${hwCell}</td>
+          <td>${escPc(k.batch_note || '—')}</td>
+          <td>${escPc(k.created_at ? new Date(k.created_at).toLocaleString() : '—')}</td>
+          <td>${formatLicenseExpiresCell(k, now)}</td>
+          <td style="white-space:nowrap">
+            <button type="button" class="serial-btn-ghost" data-license-copy-key="${escPc(k.key)}">Copy</button>
+            ${resetHwidBtn}
+            <button type="button" class="serial-btn-ghost" data-license-delete-key="${escPc(k.id)}">Delete</button>
+          </td>
+        </tr>`;
+          })
+          .join('');
+        return `<section class="license-keys-product-block" aria-labelledby="${hid}">
+        <div class="license-keys-product-head">
+          <h4 class="license-keys-product-title" id="${hid}">${titleHtml}</h4>
+          <p class="license-keys-product-meta">${meta}</p>
+        </div>
+        <div class="disk-table-wrap"><table class="pc-disk-table">
+          <thead><tr><th>Key</th><th>Plan</th><th>HWID</th><th>Note</th><th>Created</th><th>Expires</th><th style="text-align:right">Actions</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table></div>
+      </section>`;
+      });
+
+      licenseKeysMount.innerHTML = `<div class="license-keys-groups">${blocks.join('')}</div>`;
+    }
+
+    function refreshLicenseKeysTable() {
+      if (!licenseKeysMount || !lastLicenseDashboard) return;
+      const mode = licenseKeysSort?.value || 'created_desc';
+      const allKeys = lastLicenseDashboard.keys || [];
+      const filtered = filterLicenseKeysByUi(allKeys);
+      if (!filtered.length) {
+        licenseKeysMount.innerHTML =
+          allKeys.length === 0
+            ? '<p class="serial-lead license-keys-empty">No keys issued yet — generate above.</p>'
+            : '<p class="serial-lead license-keys-empty">No keys match the selected filters — try another product or key plan.</p>';
+        return;
+      }
+      renderLicenseKeysGrouped(filtered, mode);
+    }
+
+    function renderLicenseProducts(products) {
+      if (!licenseProductsMount) return;
+      if (!products.length) {
+        licenseProductsMount.innerHTML =
+          '<p class="serial-lead" style="margin:0;color:var(--muted)">No products yet — add one above.</p>';
+        return;
+      }
+      const rows = products
+        .slice()
+        .sort((a, b) => String(a.created_at).localeCompare(String(b.created_at)))
+        .map(
+          (p) => `
+        <tr>
+          <td>${escPc(p.name || '—')}</td>
+          <td>${escPc(p.description || '—')}</td>
+          <td style="font-family:JetBrains Mono,monospace;font-size:0.74rem;color:rgba(238,240,248,0.65)">${escPc(p.id || '')}</td>
+          <td>${escPc(p.created_at ? new Date(p.created_at).toLocaleString() : '—')}</td>
+          <td><button type="button" class="serial-btn-ghost" data-license-delete-product="${escPc(p.id)}">Delete</button></td>
+        </tr>`,
+        )
+        .join('');
+      licenseProductsMount.innerHTML = `<div class="disk-table-wrap"><table class="pc-disk-table">
+        <thead><tr><th>Name</th><th>Description</th><th>Id</th><th>Created</th><th></th></tr></thead>
+        <tbody>${rows}</tbody></table></div>`;
+    }
+
+    function fillLicenseProductSelect(products) {
+      if (!licenseGenProduct) return;
+      const sel = licenseGenProduct;
+      const keep = sel.value;
+      sel.innerHTML = '';
+      if (!products.length) {
+        const o = document.createElement('option');
+        o.value = '';
+        o.textContent = '— Add a product first —';
+        sel.appendChild(o);
+        sel.disabled = true;
+        return;
+      }
+      sel.disabled = false;
+      for (const p of products) {
+        const o = document.createElement('option');
+        o.value = p.id;
+        o.textContent = p.name || p.id;
+        sel.appendChild(o);
+      }
+      if (keep && products.some((p) => p.id === keep)) sel.value = keep;
+    }
+
+    async function loadLicenseDashboard(opts) {
+      const silent = !!(opts && opts.silent);
+      if (!licenseProductsMount || !licenseKeysMount) return;
+      if (!silent && licenseStatus) licenseStatus.textContent = 'Loading…';
+      try {
+        const res = await fetch('/api/license/dashboard');
+        /** @type {any} */
+        const data = await parseApiJsonBody(res);
+        if (!res.ok) throw new Error(data?.error || `HTTP ${res.status}`);
+        lastLicenseDashboard = data;
+        renderLicenseProducts(data.products || []);
+        fillLicenseProductSelect(data.products || []);
+        fillLicenseKeysProductFilter(data.products || []);
+        refreshLicenseKeysTable();
+        if (licenseStatus && !silent) licenseStatus.textContent = 'Loaded.';
+      } catch (e) {
+        lastLicenseDashboard = null;
+        if (licenseProductsMount)
+          licenseProductsMount.innerHTML = `<p class="pc-err-inline">${escPc(String(e.message || e))}</p>`;
+        if (licenseKeysMount) licenseKeysMount.innerHTML = '';
+        if (licenseStatus)
+          licenseStatus.textContent =
+            'Could not load license data — use localhost / 127.0.0.1 and restart Node after updating server.js.';
+      }
+    }
+
+    licenseRefreshBtn?.addEventListener('click', () => {
+      void loadLicenseDashboard();
+    });
+
+    licenseKeysSort?.addEventListener('change', () => {
+      refreshLicenseKeysTable();
+    });
+
+    licenseKeysFilterProduct?.addEventListener('change', () => {
+      refreshLicenseKeysTable();
+    });
+
+    licenseKeysFilterPlan?.addEventListener('change', () => {
+      refreshLicenseKeysTable();
+    });
+
+    licenseProductAddBtn?.addEventListener('click', async () => {
+      const name = licenseProductName?.value?.trim() || '';
+      const description = licenseProductDesc?.value?.trim() || '';
+      if (!name) {
+        if (licenseStatus) licenseStatus.textContent = 'Enter a product name.';
+        return;
+      }
+      licenseProductAddBtn.disabled = true;
+      try {
+        const res = await fetch('/api/license/products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, description }),
+        });
+        /** @type {any} */
+        const data = await parseApiJsonBody(res);
+        if (!res.ok) throw new Error(data?.error || `HTTP ${res.status}`);
+        if (licenseProductName) licenseProductName.value = '';
+        if (licenseProductDesc) licenseProductDesc.value = '';
+        if (licenseStatus) licenseStatus.textContent = 'Product added.';
+        await loadLicenseDashboard({ silent: true });
+      } catch (e) {
+        if (licenseStatus) licenseStatus.textContent = String(e.message || e);
+      } finally {
+        licenseProductAddBtn.disabled = false;
+      }
+    });
+
+    /** Sync duration field before Generate (belt-and-suspenders vs focus/blur quirks). */
+    licenseGenBtn?.addEventListener('pointerdown', () => {
+      licenseGenDuration?.blur();
+    });
+
+    licenseGenBtn?.addEventListener('click', async () => {
+      const product_id = licenseGenProduct?.value?.trim() || '';
+      let count = Number(licenseGenCount?.value);
+      if (!Number.isFinite(count)) count = 1;
+      const batch_note = licenseGenNote?.value?.trim() || '';
+      if (!product_id) {
+        if (licenseStatus) licenseStatus.textContent = 'Pick a product first.';
+        return;
+      }
+      const durRead = readLicenseDurationDays();
+      if (!durRead.ok) {
+        if (licenseStatus) licenseStatus.textContent = durRead.message || 'Invalid duration.';
+        return;
+      }
+      /** @type {Record<string, unknown>} */
+      const payload = { product_id, count, batch_note };
+      if (durRead.days != null && durRead.days > 0) payload.duration_days = durRead.days;
+
+      licenseGenBtn.disabled = true;
+      try {
+        const res = await fetch('/api/license/keys/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        /** @type {any} */
+        const data = await parseApiJsonBody(res);
+        if (!res.ok) throw new Error(data?.error || `HTTP ${res.status}`);
+        const keys = Array.isArray(data.keys) ? data.keys : [];
+        const firstKey = keys[0];
+        const expIso = firstKey && firstKey.expires_at ? String(firstKey.expires_at) : '';
+        let genMsg = `Generated ${keys.length} key(s). First: ${firstKey?.key || ''}`;
+        if (durRead.days != null && durRead.days > 0) {
+          if (expIso)
+            genMsg += ` · expires ${new Date(expIso).toLocaleString()}`;
+          else
+            genMsg +=
+              ' · expiry not saved — fully stop and restart Node so server.js with duration support is running.';
+        }
+        if (licenseStatus) licenseStatus.textContent = genMsg;
+        await loadLicenseDashboard({ silent: true });
+      } catch (e) {
+        if (licenseStatus) licenseStatus.textContent = String(e.message || e);
+      } finally {
+        licenseGenBtn.disabled = false;
+      }
+    });
+
+    licenseProductsMount?.addEventListener('click', async (ev) => {
+      const btn = ev.target && /** @type {HTMLElement} */ (ev.target).closest('[data-license-delete-product]');
+      if (!btn) return;
+      const id = btn.getAttribute('data-license-delete-product');
+      if (!id || !confirm('Delete this product and all its keys?')) return;
+      try {
+        const res = await fetch(`/api/license/products/${encodeURIComponent(id)}`, { method: 'DELETE' });
+        /** @type {any} */
+        const data = await parseApiJsonBody(res);
+        if (!res.ok) throw new Error(data?.error || `HTTP ${res.status}`);
+        if (licenseStatus) licenseStatus.textContent = 'Product deleted.';
+        await loadLicenseDashboard({ silent: true });
+      } catch (e) {
+        if (licenseStatus) licenseStatus.textContent = String(e.message || e);
+      }
+    });
+
+    licenseKeysMount?.addEventListener('click', async (ev) => {
+      const t = ev.target && /** @type {HTMLElement} */ (ev.target).closest('button');
+      if (!t) return;
+      const copy = t.getAttribute('data-license-copy-key');
+      if (copy && navigator.clipboard?.writeText) {
+        try {
+          await navigator.clipboard.writeText(copy);
+          if (licenseStatus) licenseStatus.textContent = 'Key copied.';
+        } catch {
+          /* ignore */
+        }
+        return;
+      }
+      const resetHwidId = t.getAttribute('data-license-reset-hwid');
+      if (resetHwidId) {
+        if (t.getAttribute('data-license-hwid-empty') === '1') {
+          if (licenseStatus) licenseStatus.textContent = 'No HWID bound on this key yet — nothing to reset.';
+          return;
+        }
+        if (!confirm('Reset HWID for this key? It can bind to a different machine on next activation.')) return;
+        try {
+          const res = await fetch(`/api/license/keys/${encodeURIComponent(resetHwidId)}/hwid`, {
+            method: 'DELETE',
+          });
+          /** @type {any} */
+          const data = await parseApiJsonBody(res);
+          if (!res.ok) throw new Error(data?.error || `HTTP ${res.status}`);
+          if (licenseStatus) licenseStatus.textContent = 'HWID reset.';
+          await loadLicenseDashboard({ silent: true });
+        } catch (e) {
+          if (licenseStatus) licenseStatus.textContent = String(e.message || e);
+        }
+        return;
+      }
+      const kid = t.getAttribute('data-license-delete-key');
+      if (!kid || !confirm('Delete this key record?')) return;
+      try {
+        const res = await fetch(`/api/license/keys/${encodeURIComponent(kid)}`, { method: 'DELETE' });
+        /** @type {any} */
+        const data = await parseApiJsonBody(res);
+        if (!res.ok) throw new Error(data?.error || `HTTP ${res.status}`);
+        if (licenseStatus) licenseStatus.textContent = 'Key deleted.';
+        await loadLicenseDashboard({ silent: true });
+      } catch (e) {
+        if (licenseStatus) licenseStatus.textContent = String(e.message || e);
+      }
+    });
+
+    function select(which) {
+      const tabs = [
+        ['home', tabHome, panelHome],
+        ['steam', tabSteam, panelSteam],
+        ['game-updates', tabGameUpdates, panelGameUpdates],
+        ['serial', tabSerial, panelSerial],
+        ['startup', tabStartup, panelStartup],
+        ['security', tabSecurity, panelSecurity],
+        ['license', tabLicense, panelLicense],
+      ];
+      for (const [id, btn, panel] of tabs) {
+        const on = id === which;
+        if (btn) btn.setAttribute('aria-selected', on ? 'true' : 'false');
+        if (panel) {
+          panel.hidden = !on;
+          panel.setAttribute('aria-hidden', on ? 'false' : 'true');
+        }
+      }
+
+      if (which === 'steam' && iframe && !iframe.dataset.loaded) {
+        iframe.src = STEAM_FRAME_SRC;
+        iframe.dataset.loaded = 'true';
+      }
+
+      if (which === 'game-updates' && gameUpdatesFrame && !gameUpdatesFrame.dataset.loaded) {
+        gameUpdatesFrame.src = GAME_UPDATES_FRAME_SRC;
+        gameUpdatesFrame.dataset.loaded = 'true';
+      }
+
+      if (which === 'serial') {
+        void refreshExternalSerialCheckerUi();
+      }
+
+      if (which === 'startup' && startupMount && startupMount.dataset.autoFetched !== '1') {
+        startupMount.dataset.autoFetched = '1';
+        void runStartupAppsFetch(false);
+      }
+
+      if (which === 'license') {
+        void loadLicenseDashboard();
+      }
+    }
+
+    tabHome?.addEventListener('click', () => select('home'));
+    tabSteam?.addEventListener('click', () => select('steam'));
+    tabGameUpdates?.addEventListener('click', () => select('game-updates'));
+    tabSerial?.addEventListener('click', () => select('serial'));
+    tabStartup?.addEventListener('click', () => select('startup'));
+    tabSecurity?.addEventListener('click', () => select('security'));
+    tabLicense?.addEventListener('click', () => select('license'));
+
+    const hint = document.getElementById('hint-url');
+    if (hint) hint.textContent = `${location.protocol}//${location.host}/`;
+
+    initSiteAppearance();
+
+    const qp = new URLSearchParams(location.search).get('app');
+    if (qp === 'steam') select('steam');
+    else if (qp === 'game-updates') select('game-updates');
+    else if (qp === 'serial') select('serial');
+    else if (qp === 'startup') select('startup');
+    else if (qp === 'security') select('security');
+    else if (qp === 'license') select('license');
+
+    /** Collapsible sidebar (wide viewports): push panel away, persist choice */
+    const RAIL_COLLAPSED_KEY = 'galaxy.railCollapsed';
+    const railContainer = document.getElementById('rail-container');
+    const railToggle = document.getElementById('rail-toggle');
+    const mqDesktopRail = window.matchMedia('(min-width: 761px)');
+
+    function setRailCollapsed(collapsed) {
+      if (!railContainer || !railToggle) return;
+      const desktop = mqDesktopRail.matches;
+      if (!desktop) {
+        railContainer.classList.remove('is-collapsed');
+        railToggle.hidden = true;
+        railToggle.setAttribute('aria-hidden', 'true');
+        railToggle.tabIndex = -1;
+        return;
+      }
+      railToggle.hidden = false;
+      railToggle.removeAttribute('aria-hidden');
+      railToggle.tabIndex = 0;
+      railContainer.classList.toggle('is-collapsed', collapsed);
+      railToggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+      railToggle.setAttribute(
+        'title',
+        collapsed ? 'Expand sidebar' : 'Collapse sidebar',
+      );
+      railToggle.setAttribute(
+        'aria-label',
+        collapsed ? 'Expand Galaxy Products sidebar' : 'Collapse Galaxy Products sidebar',
+      );
+    }
+
+    function readStoredCollapsed() {
+      try {
+        return localStorage.getItem(RAIL_COLLAPSED_KEY) === '1';
+      } catch {
+        return false;
+      }
+    }
+
+    mqDesktopRail.addEventListener('change', () => {
+      setRailCollapsed(mqDesktopRail.matches && readStoredCollapsed());
+    });
+    setRailCollapsed(mqDesktopRail.matches && readStoredCollapsed());
+
+    railToggle?.addEventListener('click', () => {
+      if (!mqDesktopRail.matches) return;
+      const next = !railContainer.classList.contains('is-collapsed');
+      setRailCollapsed(next);
+      try {
+        localStorage.setItem(RAIL_COLLAPSED_KEY, next ? '1' : '0');
+      } catch { /* ignore */ }
+    });
+  </script>
+</body>
+</html>

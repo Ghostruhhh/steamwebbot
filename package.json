@@ -1,0 +1,31 @@
+{
+  "name": "steamwebbot",
+  "version": "1.4.6",
+  "description": "Local web app to look up Steam profile info: hours, level, owned games, recent activity, bans, friends.",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "loader": "node loader/loader.js",
+    "build:loader-exe": "node scripts/stopGalaxyLoaderPkgExe.js && pkg loader/loader.js --targets node20-win-x64 --output dist/GalaxyLoader.exe --public",
+    "build:galaxy-gui": "npm install --prefix galaxy-desktop --no-audit --no-fund && npm run build --prefix galaxy-desktop"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "systeminformation": "^5.31.6"
+  },
+  "devDependencies": {
+    "@yao-pkg/pkg": "^5.16.1"
+  },
+  "pkg": {
+    "scripts": [
+      "node_modules/systeminformation/**/*.js",
+      "lib/**/*.js"
+    ]
+  }
+}

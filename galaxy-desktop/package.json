@@ -1,0 +1,54 @@
+{
+  "name": "galaxy-loader-gui",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Galaxy Products — desktop loader (EXE with themed UI)",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win portable"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "systeminformation": "^5.31.6"
+  },
+  "devDependencies": {
+    "electron": "^34.3.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.galaxyproducts.loader",
+    "productName": "Galaxy Loader",
+    "copyright": "Galaxy Products",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*",
+      {
+        "from": "../lib/galaxyHwid.js",
+        "to": "lib/galaxyHwid.js"
+      },
+      {
+        "from": "../lib/loaderHubActivate.js",
+        "to": "lib/loaderHubActivate.js"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "signAndEditExecutable": false
+    },
+    "portable": {
+      "artifactName": "GalaxyLoaderGUI.exe"
+    }
+  }
+}

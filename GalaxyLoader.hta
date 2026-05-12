@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<title>Galaxy Loader</title>
+
+<HTA:APPLICATION
+  ID="galaxyLoaderApp"
+  APPLICATIONNAME="Galaxy Products Loader"
+  BORDER="thin"
+  CAPTION="yes"
+  SINGLEINSTANCE="yes"
+  WINDOWSTATE="normal"
+  SCROLL="no"
+  CONTEXTMENU="no"
+  INNERBORDER="no"
+/>
+
+<style type="text/css">
+html,body { margin: 0; height: 100%; overflow: hidden; }
+body {
+  font-family: "Segoe UI", "Inter", system-ui, sans-serif;
+  font-size: 13px;
+  color: #e6edf3;
+  background: radial-gradient(1200px 500px at 50% -20%, rgba(102, 192, 244, 0.09), transparent 55%),
+    linear-gradient(180deg, #06080d 0%, #131822 42%, #0a0e14 100%);
+  box-sizing: border-box;
+}
+#wrap {
+  padding: 20px 22px 18px;
+  max-width: 520px;
+  margin: 0 auto;
+}
+h1 {
+  margin: 0 0 4px;
+  font-weight: 600;
+  font-size: 17px;
+  letter-spacing: -0.02em;
+}
+h1 span { color: #66c0f4; }
+p.lead {
+  margin: 0 0 16px;
+  color: #8b96a8;
+  line-height: 1.45;
+  font-size: 12px;
+}
+label { display: block; font-size: 11px; color: #b481ff; margin-bottom: 6px; }
+.key-row { display: flex; align-items: stretch; gap: 8px; margin-top: 2px; }
+.key-row #key {
+  flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
+  font-family: "Consolas", "Segoe UI Mono", monospace;
+  font-size: 14px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(125,138,155,0.35);
+  background: rgba(12,14,22,0.85);
+  color: #eaf0f9;
+}
+.key-row #key:focus { outline: 2px solid rgba(102,192,244,0.35); outline-offset: 1px; }
+.row { margin-top: 14px; display: flex; flex-wrap: wrap; align-items: center; }
+.row button { margin: 0 8px 6px 0; }
+button {
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 9px 16px;
+  border-radius: 8px;
+  border: none;
+  color: #081018;
+  background: linear-gradient(165deg, #66c0f4 0%, #4aabdf 45%, #3d96cc 100%);
+}
+button.secondary {
+  background: rgba(125,138,155,0.25);
+  color: #cdd6e8;
+  border: 1px solid rgba(125,138,155,0.35);
+}
+button:disabled { opacity: 0.45; cursor: default; }
+#log {
+  margin-top: 14px;
+  height: 200px;
+  width: 100%;
+  box-sizing: border-box;
+  resize: none;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(125,138,155,0.25);
+  background: rgba(6,8,13,0.55);
+  color: #aab6c9;
+  font-family: Consolas, monospace;
+  font-size: 11px;
+  line-height: 1.4;
+}
+.small { margin-top: 10px; font-size: 11px; color: #6f7c90; line-height: 1.35; }
+</style>
+
+<script language="Javascript">
+(function () {
+
+function projectRootFromHtaUrl() {
+  try {
+    var p = decodeURIComponent(String(document.location.pathname || ''));
+    if (p.length && p.charAt(0) === '/') p = p.substring(1);
+    p = p.replace(/\//g, '\\').replace(/^\\+/, '');
+    if (/^[a-zA-Z]:\\/.test(p)) {
+      var m = /^(.+)\\([^\\]+)$/i.exec(p);
+      return m ? m[1] : '';
+    }
+  } catch (e2) {}
+  return '';
+}
+
+function shell() {
+  return new ActiveXObject('WScript.Shell');
+}
+
+function fso() {
+  return new ActiveXObject('Scripting.FileSystemObject');
+}
+
+function findNodeExe() {
+  try {
+    var sh = shell();
+    var exe = String(sh.ExpandEnvironmentStrings('%ProgramFiles%')) + '\\nodejs\\node.exe';
+    if (fso().FileExists(exe)) return exe;
+    var exe86 = String(sh.ExpandEnvironmentStrings('%ProgramFiles(x86)%')) + '\\nodejs\\node.exe';
+    if (fso().FileExists(exe86)) return exe86;
+  } catch (e) {}
+  return '';
+}
+
+function hasExpress(root) {
+  try {
+    return fso().FileExists(root + '\\node_modules\\express\\package.json');
+  } catch (e) { return false; }
+}
+
+function npmCmdPath(sh) {
+  var p64 = String(sh.ExpandEnvironmentStrings('%ProgramFiles%')) + '\\nodejs\\npm.cmd';
+  if (fso().FileExists(p64)) return p64;
+  var p86 = String(sh.ExpandEnvironmentStrings('%ProgramFiles(x86)%')) + '\\nodejs\\npm.cmd';
+  if (fso().FileExists(p86)) return p86;
+  return '';
+}
+
+function ensureDeps(root, appendLog, onDone, onFatal) {
+  if (hasExpress(root)) return onDone();
+  var sh = shell();
+  var npm = npmCmdPath(sh);
+  appendLog('First run: installing npm packages…\r\n');
+  if (!npm) {
+    onFatal('npm.cmd not found. Install Node.js LTS from nodejs.org, then open this launcher again.');
+    return;
+  }
+  var cwdPrev = '';
+  try {
+    cwdPrev = sh.CurrentDirectory;
+    sh.CurrentDirectory = root;
+  } catch (e1) {}
+  var code = sh.Run('"' + npm.replace(/"/g, '""') + '" install', 0, true);
+  try {
+    if (cwdPrev) sh.CurrentDirectory = cwdPrev;
+  } catch (e3) {}
+  if (code !== 0) {
+    onFatal('npm install failed (exit ' + code + '). Fix network / permissions or run npm install manually in the steamwebbot folder.');
+    return;
+  }
+  if (!hasExpress(root)) {
+    onFatal('Dependencies still missing after npm install.');
+    return;
+  }
+  appendLog('Ready.\r\n\r\n');
+  onDone();
+}
+
+function stripAnsi(txt) {
+  return String(txt || '').replace(/\u001b\[[\d;]*m/g, '');
+}
+
+function waitExec(exec, cb) {
+  var tmr = window.setInterval(function () {
+    if (exec.Status !== 0) {
+      window.clearInterval(tmr);
+      var merged = '';
+      try {
+        merged += exec.StdErr.ReadAll();
+      } catch (e1) {}
+      try {
+        merged += exec.StdOut.ReadAll();
+      } catch (e2) {}
+      var code = 0;
+      try {
+        code = exec.ExitCode;
+      } catch (e3) {
+        code = 1;
+      }
+      cb(code, stripAnsi(merged));
+    }
+  }, 80);
+}
+
+function normalizeKey(raw) {
+  raw = String(raw || '').trim().toUpperCase().replace(/\s+/g, '');
+  var re = /^GP-[A-HJ-NP-Z2-9]{4}(?:-[A-HJ-NP-Z2-9]{4}){3}$/;
+  return re.test(raw) ? raw : null;
+}
+
+function quoteExecArg(arg) {
+  var s = String(arg);
+  return '"' + s.replace(/"/g, '""') + '"';
+}
+
+function runNode(root, argvTail, cb) {
+  var nodeExe = findNodeExe();
+  if (!nodeExe) {
+    cb(1, 'Node.js was not found. Install LTS from https://nodejs.org and reopen this launcher.');
+    return;
+  }
+  var sh = shell();
+  var cwdPrev = '';
+  try {
+    cwdPrev = sh.CurrentDirectory;
+    sh.CurrentDirectory = root;
+  } catch (e0) {}
+
+  var parts = [];
+  parts.push(quoteExecArg(nodeExe));
+  parts.push(quoteExecArg(root + '\\loader\\loader.js'));
+
+  var i;
+  for (i = 0; i < argvTail.length; i++) {
+    parts.push(quoteExecArg(argvTail[i]));
+  }
+
+  var execObj = sh.Exec(parts.join(' '));
+  waitExec(execObj, function (code, out) {
+    try {
+      if (cwdPrev) sh.CurrentDirectory = cwdPrev;
+    } catch (e4) {}
+    cb(code, out);
+  });
+}
+
+window.onload = function () {
+  window.resizeTo(560, 480);
+};
+
+window.doActivate = function () {
+  var log = document.getElementById('log');
+  function append(s) {
+    log.value += s;
+    log.scrollTop = log.scrollHeight;
+  }
+
+  document.getElementById('btnAct').disabled = true;
+  document.getElementById('btnHwid').disabled = true;
+  log.value = '';
+
+  var root = projectRootFromHtaUrl();
+  if (!root) {
+    append('Could not locate project folder.');
+    window.finishLaunch();
+    return;
+  }
+
+  var keyNorm = normalizeKey(document.getElementById('key').value);
+  if (!keyNorm) {
+    append('Paste a full license key such as GP-XXXX-XXXX-XXXX-XXXX, then activate.\r\n');
+    window.finishLaunch();
+    return;
+  }
+
+  function runAfterDeps() {
+    append('Talking to hub…\r\n');
+    runNode(root, [ keyNorm ], function (code, out) {
+      append(out ? out + '\r\n' : '');
+      append(code === 0 ? 'Done.' : 'Stopped with exit ' + code + '.');
+      window.finishLaunch();
+    });
+  }
+
+  ensureDeps(
+    root,
+    append,
+    runAfterDeps,
+    function (err) {
+      append(err + '\r\n');
+      window.finishLaunch();
+    },
+  );
+};
+
+window.doShowHwid = function () {
+  var log = document.getElementById('log');
+
+  document.getElementById('btnAct').disabled = true;
+  document.getElementById('btnHwid').disabled = true;
+  log.value = '';
+
+  var root = projectRootFromHtaUrl();
+  if (!root) {
+    log.value = 'Could not locate project folder.';
+    window.finishLaunch();
+    return;
+  }
+
+  function runAfterDeps() {
+    log.value += 'Reading hardware fingerprint…\r\n';
+    runNode(root, [ '--show-hwid' ], function (code, out) {
+      log.value += out ? out + '\r\n' : '';
+      log.value += code === 0 ? 'Done.' : 'Stopped with exit ' + code + '.';
+      window.finishLaunch();
+    });
+  }
+
+  ensureDeps(
+    root,
+    function (s) { log.value += s; log.scrollTop = log.scrollHeight; },
+    runAfterDeps,
+    function (err) {
+      log.value += err + '\r\n';
+      window.finishLaunch();
+    },
+  );
+};
+
+window.finishLaunch = function () {
+  document.getElementById('btnAct').disabled = false;
+  document.getElementById('btnHwid').disabled = false;
+};
+
+})();
+</script>
+<script language="Javascript">
+function __galaxyScrubKey(raw) {
+  var s = String(raw || '').toUpperCase();
+  s = s.replace(/\s+/g, '');
+  s = s.replace(/[^A-Z0-9-]/g, '');
+  return s.substring(0, 52);
+}
+function onGalaxyKeyPasted() {
+  window.setTimeout(function () {
+    var el = document.getElementById('key');
+    if (!el) return;
+    el.value = __galaxyScrubKey(el.value);
+  }, 0);
+}
+function pasteGalaxyClip() {
+  var el = document.getElementById('key');
+  var t = '';
+  try {
+    if (window.clipboardData) t = window.clipboardData.getData('Text');
+  } catch (e) {}
+  el.value = __galaxyScrubKey(t);
+  el.focus();
+}
+</script>
+</head>
+<body>
+<div id="wrap">
+  <h1><span>Galaxy Products</span> Loader</h1>
+  <p class="lead">Paste your GP license key below (same as /loader/). No command window — use Ctrl+V to paste.</p>
+  <label for="key">License key</label>
+  <div class="key-row">
+    <input id="key" type="text" maxlength="52" autocomplete="off" spellcheck="false"
+      placeholder="GP-XXXX-XXXX-XXXX-XXXX"
+      onpaste="onGalaxyKeyPasted();" />
+    <button type="button" class="secondary" onclick="pasteGalaxyClip();">Paste</button>
+  </div>
+
+  <div class="row">
+    <button type="button" id="btnAct" onclick="doActivate();">Activate</button>
+    <button type="button" class="secondary" id="btnHwid" onclick="doShowHwid();">Copy-friendly HWID</button>
+  </div>
+
+  <textarea id="log" readonly cols="72" aria-label="Status output"></textarea>
+  <p class="small">
+    Hub URL comes from steamwebbot <code>.env</code> (PORT / LOADER_HUB_ORIGIN) like the CLI.
+    Fallback: double-click GalaxyLoader.cmd. See loader\README.txt for details.
+  </p>
+</div>
+</body>
+</html>

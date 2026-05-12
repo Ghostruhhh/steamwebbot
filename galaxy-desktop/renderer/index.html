@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Galaxy Loader</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app">
+    <h1 id="brand-title" class="hero-title">Galaxy Products</h1>
+
+    <div class="stack">
+      <input
+        id="key-in"
+        type="text"
+        spellcheck="false"
+        autocomplete="off"
+        maxlength="52"
+        data-i18n-placeholder="placeholder"
+        placeholder="Enter your key"
+        aria-label="License key"
+      />
+
+      <button type="button" id="btn-go" class="btn-activate" disabled>
+        <svg class="btn-activate__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" />
+        </svg>
+        <span data-i18n="activate">Activate Key</span>
+      </button>
+    </div>
+
+    <p class="status" id="status" role="status" aria-live="polite" data-empty="1"></p>
+    <button type="button" id="btn-open" class="text-link hidden" data-i18n="openFolder">Open installer folder…</button>
+
+    <details class="more" id="more">
+      <summary data-i18n="options">Options</summary>
+      <p class="hub-line"><span class="hub-line__lbl" data-i18n="hub">Hub</span> · <span id="hub-meta">—</span></p>
+      <label class="chk">
+        <input type="checkbox" id="chk-nodl" />
+        <span data-i18n="skipDl">Skip installer download (pair key only)</span>
+      </label>
+      <button type="button" id="btn-hwid" class="text-link text-link--block" data-i18n="hardwareId">
+        Hardware ID
+      </button>
+    </details>
+
+    <footer class="footer">
+      <button type="button" id="clear-session" class="footer__link" data-i18n="clearSession">
+        Clear Session
+      </button>
+      <div class="lang" role="group" aria-label="Language">
+        <button type="button" class="lang__btn" data-set-lang="ru" id="lang-ru">RU</button>
+        <button type="button" class="lang__btn is-active" data-set-lang="en" id="lang-en">EN</button>
+      </div>
+    </footer>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Galaxy Products — Product loader</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@450;500&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    body.gp-loader-page {
+      margin: 0;
+      min-height: 100vh;
+      min-height: 100dvh;
+      font-family: Inter, system-ui, sans-serif;
+      background:
+        radial-gradient(1200px 600px at 50% -10%, rgba(102, 192, 244, 0.12), transparent 60%),
+        radial-gradient(900px 500px at 100% 20%, rgba(180, 129, 255, 0.1), transparent 55%),
+        linear-gradient(180deg, #06080d 0%, var(--bg) 42%, #04060a 100%);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+    .gp-loader-shell {
+      max-width: 440px;
+      margin: 0 auto;
+      padding: 48px 20px 64px;
+    }
+    .gp-loader-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+    .gp-loader-mark {
+      font-size: 2rem;
+      line-height: 1;
+      filter: drop-shadow(0 0 12px rgba(102, 192, 244, 0.45));
+    }
+    .gp-loader-titles {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .gp-loader-titles span:first-child {
+      font-family: Syne, Inter, sans-serif;
+      font-weight: 800;
+      font-size: 1.35rem;
+      letter-spacing: -0.02em;
+      background: linear-gradient(110deg, #66c0f4 0%, #b481ff 50%, #5ee0e0 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .gp-loader-titles span:last-child {
+      font-size: 0.9rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .gp-loader-card {
+      background: var(--bg-2);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 24px 22px 22px;
+      box-shadow: var(--shadow);
+    }
+    .gp-loader-card h1 {
+      margin: 0 0 6px;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    .gp-loader-lead {
+      margin: 0 0 18px;
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .gp-loader-field-label {
+      display: block;
+      font-size: 0.76rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .gp-loader-key-row {
+      display: flex;
+      align-items: stretch;
+      gap: 10px;
+    }
+
+    .gp-loader-key-row .gp-loader-input {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .gp-loader-btn-paste {
+      flex-shrink: 0;
+      border-radius: var(--radius-sm);
+      padding: 0 14px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      border: 1px solid var(--line-strong);
+      background: var(--bg-3);
+      color: var(--accent);
+    }
+
+    .gp-loader-btn-paste:hover {
+      border-color: var(--accent);
+      background: var(--bg-2);
+    }
+
+    .gp-loader-input {
+      width: 100%;
+      box-sizing: border-box;
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 0.92rem;
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--line-strong);
+      background: var(--raw-bg);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .gp-loader-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+    .gp-loader-hwid-pill {
+      margin-top: 12px;
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.35;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-3);
+      border: 1px solid var(--line);
+    }
+    .gp-loader-hwid-pill strong {
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .gp-loader-actions {
+      margin-top: 20px;
+    }
+    .gp-loader-btn-primary {
+      width: 100%;
+      border: none;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 14px 18px;
+      border-radius: var(--radius-sm);
+      color: #061018;
+      background: linear-gradient(135deg, #66c0f4 0%, #81d4ff 40%, #9d7cff 110%);
+      box-shadow:
+        0 2px 0 rgba(0, 0, 0, 0.35),
+        0 12px 32px rgba(102, 192, 244, 0.25);
+      transition: transform 0.15s ease, filter 0.15s ease, opacity 0.15s;
+    }
+    .gp-loader-btn-primary:hover:not(:disabled) {
+      filter: brightness(1.06);
+      transform: translateY(-1px);
+    }
+    .gp-loader-btn-primary:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .gp-loader-msg {
+      margin-top: 16px;
+      font-size: 0.86rem;
+      line-height: 1.45;
+      min-height: 1.2em;
+    }
+    .gp-loader-msg[data-tier="err"] {
+      color: var(--red);
+    }
+    .gp-loader-msg[data-tier="ok"] {
+      color: var(--green);
+    }
+    .gp-loader-msg[data-tier="muted"] {
+      color: var(--muted);
+    }
+    .gp-loader-foot {
+      text-align: center;
+      margin-top: 36px;
+    }
+    .gp-loader-foot a {
+      font-size: 0.84rem;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .gp-loader-foot a:hover {
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body class="gp-loader-page">
+  <div class="bg-orbs" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+  <div class="gp-loader-shell">
+    <div class="gp-loader-brand">
+      <span class="gp-loader-mark" aria-hidden="true">★</span>
+      <div class="gp-loader-titles">
+        <span>Galaxy Products</span>
+        <span>Product loader</span>
+      </div>
+    </div>
+    <div class="gp-loader-card">
+      <h1>Activate &amp; continue</h1>
+      <p class="gp-loader-lead">
+        Paste your Galaxy <code class="mono">GP-…</code> key — first activation pins this browser or PC.
+        Typically you receive <strong>GalaxyLoader.exe</strong> from the seller’s hub; open it on your PC,
+        paste the same key again, and your product installer downloads there.
+      </p>
+      <label class="gp-loader-field-label" for="gp-key-input">License key</label>
+      <div class="gp-loader-key-row">
+      <input
+        id="gp-key-input"
+        class="gp-loader-input"
+        type="text"
+        spellcheck="false"
+        autocomplete="off"
+        maxlength="52"
+        placeholder="GP-XXXX-XXXX-XXXX-XXXX"
+      />
+      <button type="button" id="gp-paste-btn" class="gp-loader-btn-paste">
+        Paste
+      </button>
+      </div>
+      <div id="gp-hwid-pill" class="gp-loader-hwid-pill" hidden></div>
+      <div class="gp-loader-actions">
+        <button type="button" class="gp-loader-btn-primary" id="gp-activate-btn" disabled>
+          Activate &amp; continue
+        </button>
+      </div>
+      <p id="gp-status" class="gp-loader-msg" data-tier="muted" role="status"></p>
+    </div>
+    <div class="gp-loader-foot"><a href="/">← Galaxy Products hub</a></div>
+  </div>
+  <script src="loader-app.js" defer></script>
+</body>
+</html>

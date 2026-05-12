@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SteamScope — Game updates</title>
+  <script>
+    (function () {
+      try {
+        document.documentElement.dataset.theme = localStorage.getItem('steamscope.theme') || 'dark';
+        document.documentElement.dataset.accent = localStorage.getItem('steamscope.accent') || 'blue';
+      } catch (e) { /* ignore */ }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><defs><radialGradient id='g' cx='30%25' cy='30%25'><stop offset='0%25' stop-color='%2366c0f4'/><stop offset='100%25' stop-color='%231b74b3'/></radialGradient></defs><circle cx='32' cy='32' r='28' fill='url(%23g)'/><circle cx='32' cy='32' r='10' fill='none' stroke='white' stroke-width='3'/><circle cx='32' cy='32' r='3' fill='white'/></svg>" />
+  <style>
+    .gu-page { max-width: 920px; margin: 0 auto; padding: 28px 20px 48px; }
+    .gu-page .panel { margin: 0; }
+    .gu-back { margin-bottom: 16px; }
+    .gu-back a {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+    .gu-back a:hover { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="bg-orbs" aria-hidden="true">
+    <span class="orb orb-1"></span>
+    <span class="orb orb-2"></span>
+    <span class="orb orb-3"></span>
+  </div>
+
+  <main class="gu-page">
+    <p class="gu-back muted small">
+      Part of <strong style="color:var(--text)">SteamScope</strong>. Open the full checker at
+      <a href="/steam-web-hour-checker/">/steam-web-hour-checker/</a>
+    </p>
+
+    <section class="panel" aria-label="Tracked game updates">
+      <div class="updates-tools">
+        <p class="muted small updates-lead">
+          Main clock = <strong>newest Steam news item</strong> (any feed). SteamDB <strong>Last record update</strong> must be checked on their site — use <strong>SteamDB app</strong> on each card.
+        </p>
+        <form id="updates-add-form" class="updates-add-form">
+          <input id="updates-appid" type="text" inputmode="numeric" placeholder="App ID (e.g. 252490)" autocomplete="off" />
+          <input id="updates-label" type="text" placeholder="Label (optional)" autocomplete="off" />
+          <button class="btn btn-primary" type="submit">Add game</button>
+          <button class="btn btn-ghost" type="button" id="updates-refresh">Refresh</button>
+        </form>
+        <div id="updates-meta" class="updates-meta muted small"></div>
+      </div>
+      <div id="updates-list" class="updates-list"></div>
+    </section>
+  </main>
+
+  <div id="toast-stack" class="toast-stack" aria-live="polite" aria-atomic="true"></div>
+  <script src="/game-updates/game-updates-page.js"></script>
+</body>
+</html>
